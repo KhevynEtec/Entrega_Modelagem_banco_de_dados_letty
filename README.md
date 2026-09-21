@@ -30,7 +30,8 @@
   * **Forma de Contato:** Telefone: +55 11 99272-0925 (Mande mensagem no WhatsApp antes de ligar) / E-mail: ednilson2306@gmail.com
   * **CNPJ:** 62.549.640/0001-02
   * **Entrevista:** Entrevista técnica e levantamento de requisitos com o gestor comercial em setembro de 2026.
-  * **Fotos:** <img width="1126" height="1338" alt="image" src="https://github.com/user-attachments/assets/5c7eaf1b-62cb-41ca-a974-c7f16393893d" />
+  * **Fotos:**
+   <img width="252" height="300" alt="image" src="https://github.com/user-attachments/assets/5c7eaf1b-62cb-41ca-a974-c7f16393893d" />
 
   
 
