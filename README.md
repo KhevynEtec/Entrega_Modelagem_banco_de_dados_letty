@@ -116,7 +116,6 @@
   * **REPRESENTANTE fecha PEDIDO (1:N):** Um representante registra diversos pedidos.
   * **PROMOTOR realiza VISITA (1:N) em LOJA (1:N):** Um promotor realiza várias visitas; uma loja recebe auditorias periódicas.
   * **PEDIDO contém ITEM_PEDIDO (1:N) de PRODUTO (1:N):** Um pedido engloba múltiplos produtos negociados em quantidades e preços específicos.
-  * **VISITA realiza AUDITORIA_GONDOLA (0:N) de PRODUTO (1:N):** Durante a visita, podem ser checados zero ou múltiplos produtos em gôndola.
 
 ---
 
