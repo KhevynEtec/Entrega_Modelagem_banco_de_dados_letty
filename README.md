@@ -145,7 +145,7 @@ A modelagem do sistema da Letty Gestão Comercial foi concebida para sanar diret
 | **Motivação** | Padronizar a documentação técnica conforme o template oficial do projeto e estruturar os dados levantados em campo sem omissão de regras ou atributos. |
 | **Prompt(s) utilizados** | "Com base nos dados fornecidos quero que realize a substituição dos dados deste read me com base nas regras propostas dentro dele." / "transforme isso em arquivo .md, a parte 2 com fluxograma, 5 e 7, não inclua, pois serão imagens ou outros arquivos" |
 | **Resposta recebida** | Texto estruturado preenchendo as seções do esqueleto do README em formato Markdown. |
-| **Fontes consultadas e verificadas** | Comparação direta com o documento `Dicionário_de_Dados_letty_quinta_Vs_2.1.html` e com as transcrições das perguntas e respostas em `Perguntas Gestão Comercial - Ednilson (1).pdf`. |
+| **Fontes consultadas e verificadas** | Comparação direta com o documento `Dicionário_de_Dados_letty_quinta_Vs_03.html` e com as transcrições das perguntas e respostas em `Perguntas Gestão Comercial - Ednilson (1).pdf`. |
 | **Trechos rejeitados ou corrigidos** | Omissão proposital das seções 2 (fluxograma), 5 (dicionário de dados) e 7 (DER) conforme instruído, deixando notas indicativas de anexo. |
 | **Justificativa da escolha final** | A estrutura gerada respeita com precisão as cardinalidades, convenções de chave, normas de proteção de dados (LGPD) e o fluxo do SGBD MySQL 8 estipulado na documentação técnica. |
 | **Reflexão crítica** | A IA acelera o alinhamento de texto e a formatação Markdown, porém exige revisão constante para garantir que os itens indicados para remoção/anexo sejam devidamente omitidos. |
