@@ -96,17 +96,144 @@
 ## 6. Modelagem Conceitual (Entidades, Atributos, Relacionamentos)
 
 - **Entidades e Atributos Reconhecidos:**
-  * **FABRICANTE:** Entidade detentora dos produtos alimentícios e contratante da representação.
-  * **PRODUTO:** Itens do catálogo comercial com dados fiscais, físicos e preço base.
-  * **LOTE:** Rastreabilidade de produção, controle de validade e datas.
-  * **SUPER_MERCADO:** Entidade matriz compradora no varejo.
-  * **LOJA:** Filial física compradora e ponto de entrega/reposição de produtos.
-  * **CONTATO:** Pessoas físicas interlocutoras de cada setor (Fiscal, Pricing, Compras, Logística).
-  * **PROMOTOR:** Agente terceirizado responsável pelo abastecimento em gôndola.
-  * **REPRESENTANTE:** Agente comercial responsável pelas negociações e emissão de pedidos.
-  * **PEDIDO:** Transação comercial consolidada entre fabricante, representante, rede e loja.
-  * **ITEM_PEDIDO:** Detalhe das linhas do pedido, relacionando cada produto negociado à sua respectiva quantidade e preço fechado na venda.
-  * **VISITA:** Atendimento presencial para conferência de estoque de gôndola e validades.
+
+### **1. FABRICANTE**
+
+* **ID_FABRICANTE** (Chave Primária): Identificador único do fabricante no sistema.
+* **NM_RAZAO_SOCIAL**: Razão social completa da empresa fabricante.
+* **NM_FANTASIA**: Nome de exibição ou marca do fabricante no mercado.
+* **CD_CNPJ**: Cadastro Nacional da Pessoa Jurídica (Chave única e obrigatória).
+* **CD_INSCRICAO_ESTADUAL**: Inscrição estadual para validação de emissão fiscal.
+* **DS_ENDERECO**: Endereço completo da sede do fabricante.
+* **CD_TELEFONE**: Telefone corporativo principal da fábrica.
+* **DS_EMAIL**: E-mail oficial do departamento comercial/administrativo.
+* **DT_INICIO_REPRESENTACAO**: Data do início do contrato de representação.
+
+---
+
+### **2. PRODUTO**
+
+* **ID_PRODUTO** (Chave Primária): Identificador único do produto no sistema.
+* **ID_FABRICANTE** (Chave Estrangeira): Vincula o produto ao seu fabricante.
+* **CD_EAN**: Código de barras global do produto (Chave única).
+* **CD_NCM**: Nomenclatura Comum do Mercosul para fins de tributação fiscal.
+* **DS_PRODUTO**: Descrição comercial detalhada do item.
+* **NM_MARCA**: Nome comercial da marca do produto.
+* **TP_EMBALAGEM**: Tipo do acondicionamento (ex.: Caixa, Pacote, Fardo, Garrafa).
+* **QT_PESO_BRUTO**: Peso bruto total incluindo embalagem (em kg).
+* **QT_PESO_LIQUIDO**: Peso líquido real do conteúdo (em kg).
+* **TP_UNIDADE_MEDIDA**: Unidade de medida para comercialização (ex.: KG, UN, CX).
+* **VL_PRECO_TABELA**: Valor base de tabela do produto antes das negociações.
+* **TP_REGIME_TRIBUTARIO**: Classificação fiscal/tributária do produto.
+* **IN_ATIVO**: Indicador booleano que define se o produto está ativo para venda e reposição.
+
+---
+
+### **3. LOTE**
+
+* **ID_LOTE** (Chave Primária): Identificador do lote no banco de dados.
+* **ID_PRODUTO** (Chave Estrangeira): Chave estrangeira que vincula o lote a um produto.
+* **CD_NUMERO_LOTE**: Código de controle de lote atribuído pela fábrica.
+* **QT_PRODUZIDA**: Quantidade total de unidades fabricadas na remessa.
+* **DT_FABRICACAO**: Data de industrialização da mercadoria.
+* **DT_VALIDADE**: Data limite de validade para controle e emissão de alertas de vencimento.
+
+---
+
+### **4. SUPER_MERCADO**
+
+* **ID_REDE** (Chave Primária): Identificador único da rede/matriz de supermercados.
+* **NM_RAZAO_SOCIAL**: Razão social oficial da rede.
+* **NM_FANTASIA**: Nome fantasia/marca da rede varejista.
+* **CD_CNPJ**: CNPJ da matriz do grupo comprador (Chave única).
+* **CD_INSCRICAO_ESTADUAL**: Inscrição estadual para faturamento.
+* **DS_ENDERECO**: Endereço da matriz administrativa.
+* **CD_TELEFONE**: Telefone de contato institucional e central de compras.
+* **NM_REPRESENTANTE_GERAL**: Nome do gestor/comprador principal da rede.
+* **DS_PORTAL_URL** *(Opcional)*: Endereço do portal eletrônico de pedidos da rede.
+* **DT_INICIO_RELACIONAMENTO**: Data do primeiro cadastro/atendimento da rede.
+
+---
+
+### **5. LOJA**
+
+* **ID_LOJA** (Chave Primária): Identificador interno da filial/loja.
+* **ID_REDE** (Chave Estrangeira): Referência à rede/matriz proprietária.
+* **CD_CODIGO_LOJA_REDE**: Código de identificação interno da loja no sistema da própria rede.
+* **NM_LOJA**: Nome de identificação da filial (ex.: "Loja 02 - Centro").
+* **CD_CNPJ**: CNPJ próprio da filial física (Chave única).
+* **DS_ENDERECO**: Endereço físico completo da loja para entregas.
+* **CD_TELEFONE**: Contato telefônico direto do setor de recebimento da loja.
+* **IN_ATIVA**: Indicador se a filial está ativa e operante.
+
+---
+
+### **6. CONTATO**
+
+* **ID_CONTATO** (Chave Primária): Identificador único do registro de contato.
+* **ID_REDE** (Chave Estrangeira): Associação obrigatória do profissional à rede compradora.
+* **ID_LOJA** (Chave Estrangeira, *(Opcional)*): Vínculo com uma loja/filial específica, se aplicável.
+* **NM_CONTATO**: Nome completo do interlocutor.
+* **DS_SETOR**: Setor do profissional (ex.: Fiscal, Logística, Pricing, Compras).
+* **DS_CARGO**: Cargo ou função desempenhada na empresa cliente.
+* **CD_TELEFONE**: Telefone ou ramal direto do contato.
+* **DS_EMAIL**: E-mail para envio de documentos, cotações e pedidos.
+
+---
+
+### **7. PROMOTOR**
+
+* **ID_PROMOTOR** (Chave Primária): Identificador único do promotor.
+* **NM_PROMOTOR**: Nome completo do repositor/promotor terceirizado.
+* **CD_CPF**: CPF do profissional (Chave única).
+* **CD_TELEFONE**: Telefone celular/WhatsApp para comunicação e alertas.
+* **NM_EMPRESA_TERCEIRIZADA**: Razão social/nome da agência terceirizada prestadora do serviço.
+
+---
+
+### **8. REPRESENTANTE**
+
+* **ID_REPRESENTANTE** (Chave Primária): Identificador único do representante comercial.
+* *(Modelado no sistema sem atributos adicionais por decisão de projeto).*
+
+---
+
+### **9. PEDIDO**
+
+* **ID_PEDIDO** (Chave Primária): Identificador do pedido de venda.
+* **ID_REDE** (Chave Estrangeira): Identificador da rede cliente compradora.
+* **ID_REPRESENTANTE** (Chave Estrangeira): Identificador do representante emissor do pedido.
+* **ID_LOJA** (Chave Estrangeira): Identificador da loja recebedora da entrega.
+* **DT_PEDIDO**: Data de emissão e negociação do pedido.
+* **DT_PREVISTA_ENTREGA** *(Opcional)*: Data negociada para descarregamento na loja.
+* **VL_PRECO_TOTAL**: Valor monetário total consolidado dos itens do pedido.
+* **DS_CONDICAO_PAGAMENTO**: Regra e prazo financeiro de pagamento (ex.: 30/60 dias).
+* **TP_STATUS_ATUAL**: Estado atual do pedido (ex.: Registrado, Aprovado, Faturado, Entregue, Cancelado).
+
+---
+
+### **10. ITEM_PEDIDO**
+
+* **ID_ITEM_PEDIDO** (Chave Primária): Identificador único da linha de item do pedido.
+* **ID_PEDIDO** (Chave Estrangeira): Vincula o item ao pedido correspondente.
+* **ID_PRODUTO** (Chave Estrangeira): Identifica o produto negociado.
+* **QT_PEDIDA**: Quantidade comercializada do produto no pedido.
+* **VL_PRECO_NEGOCIADO**: Preço unitário fechado/negociado para o produto na venda.
+
+---
+
+### **11. VISITA**
+
+* **ID_VISITA** (Chave Primária): Código identificador da auditoria/visita presencial.
+* **ID_PROMOTOR** (Chave Estrangeira): Identificador do promotor responsável pela visita.
+* **ID_LOJA** (Chave Estrangeira): Identificador da loja auditada.
+* **ID_PRODUTO** (Chave Estrangeira): Produto verificado em gôndola/estoque durante a visita.
+* **DT_VISITA**: Data do atendimento em loja.
+* **HR_INICIO**: Horário de início do atendimento.
+* **HR_FIM**: Horário de término do atendimento no PDV.
+* **QT_ESTOQUE_GONDOLA**: Quantidade apurada no ponto de venda/estoque.
+* **DT_VALIDADE_ENCONTRADA**: Menor data de validade mapeada em gôndola.
+* **DS_OBSERVACAO** *(Opcional)*: Relato sobre concorrência, avarias, quebras ou ações.
 
 - **Relacionamentos e Cardinalidades:**
   * **FABRICANTE fornece PRODUTO (1:N):** Um fabricante fornece diversos produtos cadastrados; um produto pertence a exatamente um fabricante.
