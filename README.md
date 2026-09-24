@@ -261,7 +261,7 @@
 
 *(O Diagrama Entidade-Relacionamento [DER] encontra-se anexado separadamente como arquivo de imagem no repositório)*
 
-<img width="1400" height="1600" alt="image" src="https://github.com/KhevynEtec/Entrega_Modelagem_banco_de_dados_letty/blob/main/DER_Conceitual_Ednilson_quinta_final_05.png" />
+<img width="1400" height="1600" alt="image" src="https://github.com/KhevynEtec/Entrega_Modelagem_banco_de_dados_letty/blob/main/DER_Conceitual_Ednilson_quinta_final_08.png" />
 
 [![Diagrama Entidade-Relacionamento]](./DER_Conceitual_Ednilson_quinta_final_08.png)
 
