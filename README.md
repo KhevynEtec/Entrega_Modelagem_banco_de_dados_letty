@@ -235,6 +235,8 @@
 * **DT_VALIDADE_ENCONTRADA**: Menor data de validade mapeada em gôndola.
 * **DS_OBSERVACAO** *(Opcional)*: Relato sobre concorrência, avarias, quebras ou ações.
 
+---
+
 - **Relacionamentos e Cardinalidades:**
 
 * **FABRICANTE para PROMOTOR (envia):** (1,n) - (1,n) — Um fabricante envia um ou vários promotores, e um promotor é enviado por um ou vários fabricantes.
