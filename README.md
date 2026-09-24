@@ -46,7 +46,9 @@
   6. **Gestão de Validade:** Identificação de itens com baixo giro/proximidade do vencimento para evitar perdas.
 
 *(Os fluxogramas dos processos chave serão disponibilizados em imagem/arquivo anexo no repositório)*
-<img width="252" height="300" alt="image" src="https://github.com/KhevynEtec/Entrega_Modelagem_banco_de_dados_letty/blob/main/_Fluxograma.png" />
+
+<img width="1700" height="1600" alt="image" src="https://github.com/KhevynEtec/Entrega_Modelagem_banco_de_dados_letty/blob/main/_Fluxograma.png" />
+
 [![Fluxograma]](./_Fluxograma.png)
 
 ---
