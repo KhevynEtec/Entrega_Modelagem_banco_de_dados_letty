@@ -140,13 +140,15 @@ A modelagem do sistema da Letty Gestão Comercial foi concebida para sanar diret
 
 ## 9. Uso de Inteligência Artificial
 
+O grupo utilizou Inteligência Artificial (Gemini 2.5) como ferramenta de apoio em etapas específicas do projeto. É fundamental destacar que **todos os dados, perguntas e artefatos gerados pela IA foram revisados, validados e alterados manualmente pelo grupo** para garantir a total fidelidade à realidade operacional da Letty Gestão Comercial.
+
 | Item | O que registrar |
 |------|------------------|
-| **Ferramenta e etapa** | Gemini 3 Flash — Utilizado na etapa de estruturação do `README.md`, formatação e consolidação das informações do Dicionário de Dados e Entrevistas de Requisitos. |
-| **Motivação** | Padronizar a documentação técnica conforme o template oficial do projeto e estruturar os dados levantados em campo sem omissão de regras ou atributos. |
-| **Prompt(s) utilizados** | "Com base nos dados fornecidos quero que realize a substituição dos dados deste read me com base nas regras propostas dentro dele." / "transforme isso em arquivo .md, a parte 2 com fluxograma, 5 e 7, não inclua, pois serão imagens ou outros arquivos" |
-| **Resposta recebida** | Texto estruturado preenchendo as seções do esqueleto do README em formato Markdown. |
-| **Fontes consultadas e verificadas** | Comparação direta com o documento `Dicionário_de_Dados_letty_quinta_Vs_03.html` e com as transcrições das perguntas e respostas em `Perguntas Gestão Comercial - Ednilson (1).pdf`. |
-| **Trechos rejeitados ou corrigidos** | Omissão proposital das seções 2 (fluxograma), 5 (dicionário de dados) e 7 (DER) conforme instruído, deixando notas indicativas de anexo. |
-| **Justificativa da escolha final** | A estrutura gerada respeita com precisão as cardinalidades, convenções de chave, normas de proteção de dados (LGPD) e o fluxo do SGBD MySQL 8 estipulado na documentação técnica. |
-| **Reflexão crítica** | A IA acelera o alinhamento de texto e a formatação Markdown, porém exige revisão constante para garantir que os itens indicados para remoção/anexo sejam devidamente omitidos. |
+| **Ferramenta e etapa** | **Gemini 2.5**, aplicado nas seguintes etapas:<br>1. **Criação das Perguntas para a Entrevista:** Formulação do roteiro de levantamento de requisitos com o gestor comercial.<br>2. **Criação do README:** Estruturação e redação da documentação técnica conforme o modelo do projeto.<br>3. **Criação do Dicionário de Dados:** Elaboração preliminar e mapeamento de tipos de dados/atributos. |
+| **Motivação** | Agilizar a estruturação do roteiro de pesquisa de campo, padronizar a documentação técnica no formato Markdown e mapear as tabelas e tipos de dados com base na especificação do sistema. |
+| **Prompt(s) utilizados** | - *Entrevista:* "Gere um roteiro de perguntas para entrevista de levantamento de requisitos com um representante comercial de produtos alimentícios do varejo."<br>- *Dicionário:* "Elabore um dicionário de dados conceitual/físico para o sistema de gestão comercial com base nas entidades mapeadas."<br>- *README:* "Com base nos dados fornecidos quero que realize a substituição dos dados deste read me com base nas regras propostas dentro dele." |
+| **Resposta recebida** | Roteiro estruturado de 20 perguntas, dicionário de dados em tabela e texto do README.md preenchido. |
+| **Fontes consultadas e verificadas** | Comparação direta com os dados coletados na entrevista presencial com o gestor Ednilson (`Perguntas Gestão Comercial - Ednilson (1).pdf`), validação da notação formal e checagem com o arquivo `Dicionário_de_Dados_letty_quinta_Vs_05.pdf`. |
+| **Trechos rejeitados ou corrigidos** | - Perguntas genéricas que não refletiam a realidade do varejo alimentício foram removidas ou reescritas.<br>- Atributos e tipos físicos sugeridos pela IA foram ajustados manualmente para atender aos padrões estipulados (ex: MySQL 8, InnoDB, UTF8MB4 e precisões de `decimal` e `varchar`).<br>- Regras de negócio genéricas foram substituídas pelas regras reais da empresa (ex: conformidade com LGPD e regras de fluxo de recebimento das lojas). |
+| **Justificativa da escolha final** | O uso da IA forneceu uma base inicial sólida, mas a validação e refinamento manual foram indispensáveis para alinhar o modelo conceitual e lógico exatamente às necessidades e restrições reais da organização. |
+| **Reflexão crítica** | A IA tende a sugerir estruturas genéricas de e-commerce ou ERP tradicional. A intervenção e correção humana foram essenciais para garantir que peculiaridades do segmento (como a diferenciação entre rede e loja física, e a auditoria de gôndola por promotor) fossem modeladas corretamente. |
