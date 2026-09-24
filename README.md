@@ -236,16 +236,23 @@
 * **DS_OBSERVACAO** *(Opcional)*: Relato sobre concorrência, avarias, quebras ou ações.
 
 - **Relacionamentos e Cardinalidades:**
-  * **FABRICANTE fornece PRODUTO (1:N):** Um fabricante fornece diversos produtos cadastrados; um produto pertence a exatamente um fabricante.
-  * **FABRICANTE possui REPRESENTANTE (1:N) / envia PROMOTOR (N:M):** Um fabricante vincula representantes e atua com múltiplos promotores.
-  * **SUPER_MERCADO possui LOJA (1:N):** Uma matriz de supermercado possui uma ou mais lojas/filiais físicas.
-  * **SUPER_MERCADO possui CONTATO (1:N):** A rede possui múltiplos contatos por setor.
-  * **PRODUTO gera LOTE (1:N):** Um produto possui múltiplos lotes fabricados ao longo do tempo.
-  * **LOJA recebe PEDIDO (1:N):** Uma loja recebe múltiplos pedidos de venda.
-  * **REPRESENTANTE fecha PEDIDO (1:N):** Um representante registra diversos pedidos.
-  * **PROMOTOR realiza VISITA (1:N) em LOJA (1:N):** Um promotor realiza várias visitas; uma loja recebe auditorias periódicas.
-  * **PEDIDO contém ITEM_PEDIDO (1:N) de PRODUTO (1:N):** Um pedido engloba múltiplos produtos negociados em quantidades e preços específicos.
 
+* **FABRICANTE para PROMOTOR (envia):** (1,n) - (1,n) — Um fabricante envia um ou vários promotores, e um promotor é enviado por um ou vários fabricantes.
+* **FABRICANTE para REPRESENTANTE (representa):** (1,n) - (1,n) — Um fabricante vincula representação comercial com um ou vários representantes, e um representante representa um ou vários fabricantes.
+* **FABRICANTE para PRODUTO (fabrica):** (1,n) - (1,n) — Um fabricante fabrica um ou vários produtos, e um produto é fabricado por um ou vários fabricantes.
+* **SUPER_MERCADO para LOJA (1:n / possui):** (1,n) - (1,n) — Uma rede de supermercado possui uma ou várias lojas, e uma loja pertence a uma ou várias redes.
+* **SUPER_MERCADO para CONTATO (tem):** (1,n) - (1,n) — Uma rede tem um ou vários contatos, e um contato pertence a uma ou várias redes.
+* **SUPER_MERCADO para PEDIDO (registra):** (1,n) - (1,n) — Uma rede registra um ou vários pedidos, e um pedido é registrado por uma ou várias redes.
+* **LOJA para CONTATO (possui):** (1,n) - (1,n) — Uma loja possui um ou vários contatos, e um contato está vinculado a uma ou várias lojas.
+* **LOJA para PEDIDO (destina-se a):** (1,n) - (1,n) — Um pedido destina-se a uma ou várias lojas, e uma loja recebe um ou vários pedidos.
+* **LOJA para VISITA (recebe):** (1,n) - (1,n) — Uma loja recebe uma ou várias visitas, e uma visita é realizada em uma ou várias lojas.
+* **PRODUTO para LOTE (possui):** (1,n) - (1,n) — Um produto possui um ou vários lotes, e um lote pertence a um ou vários produtos.
+* **PRODUTO para ITEM_PEDIDO (DE):** (1,n) - (1,n) — Um produto compõe um ou vários itens de pedido, e um item de pedido é de um ou vários produtos.
+* **PRODUTO para VISITA (verifica):** (1,n) - (1,n) — Um produto é verificado em uma ou várias visitas, e uma visita verifica um ou vários produtos.
+* **REPRESENTANTE para PEDIDO (Fecha):** (1,n) - (1,n) — Um representante fecha um ou vários pedidos, e um pedido é fechado por um ou vários representantes.
+* **PEDIDO para ITEM_PEDIDO (CONTEM):** (1,n) - (1,n) — Um pedido contém um ou vários itens de pedido, e um item de pedido pertence a um ou vários pedidos.
+* **PROMOTOR para VISITA (realiza):** (1,n) - (1,n) — Um promotor realiza uma ou várias visitas, e uma visita é realizada por um ou vários promotores.
+* 
 ---
 
 ## 7. Diagrama Entidade-Relacionamento (DER)
