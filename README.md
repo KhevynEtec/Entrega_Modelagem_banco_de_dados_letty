@@ -22,7 +22,7 @@
   * Dificuldade de controle do estoque e risco de perda de produtos por vencimento nas lojas (gerando prejuízo direto).
   * Retrabalho e gargalos no fluxo de cadastro e emissão de pedidos de venda por divergências de preços ou dados fiscais.
   * Ausência de uma plataforma unificada que integre os dados do fabricante e do varejo para suporte a decisões estratégicas e ações promocionais preventivas.
-- **Justificativa da escolha:** A Letty possui uma operação de alta relevância logística e comercial, sendo um estudo de caso ideal para modelagem de banco de dados. Apresenta complexidade adequada de entidades e relacionamentos (gestão de lotes, promoções, pedidos, auditoria em loja e conformidade fiscal/LGPD) em uma estrutura de pequeno porte acessível para levantamento de requisitos.
+- **Justificativa da escolha:** A Letty possui uma operação de alta relevância logística e comercial, sendo um estudo de caso ideal para modelagem de banco de dados. Apresenta complexidade adequada de entidades e relacionamentos (gestão de lotes, pedidos, auditoria em loja e conformidade fiscal/LGPD) em uma estrutura de pequeno porte acessível para levantamento de requisitos.
 - **Evidências da organização:** 
   * **Razão Social:** Letty Gestão Comercial LTDA.
   * **Tempo de Atuação:** 1 ano e 6 meses.
