@@ -123,7 +123,7 @@
 ## 7. Diagrama Entidade-Relacionamento (DER)
 
 *(O Diagrama Entidade-Relacionamento [DER] encontra-se anexado separadamente como arquivo de imagem no repositório)*
-[![Diagrama Entidade-Relacionamento]](./DER_Conceitual_Ednilson_quinta_final.png)
+[![Diagrama Entidade-Relacionamento]](./DER_Conceitual_Ednilson_quinta_final_03.png)
 
 ---
 
