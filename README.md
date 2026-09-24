@@ -104,6 +104,7 @@
   * **PROMOTOR:** Agente terceirizado responsável pelo abastecimento em gôndola.
   * **REPRESENTANTE:** Agente comercial responsável pelas negociações e emissão de pedidos.
   * **PEDIDO:** Transação comercial consolidada entre fabricante, representante, rede e loja.
+  * **ITEM_PEDIDO:** Detalhe das linhas do pedido, relacionando cada produto negociado à sua respectiva quantidade e preço fechado na venda.
   * **VISITA:** Atendimento presencial para conferência de estoque de gôndola e validades.
 
 - **Relacionamentos e Cardinalidades:**
