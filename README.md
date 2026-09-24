@@ -97,7 +97,21 @@
 
 - **Entidades e Atributos Reconhecidos:**
 
+  * **FABRICANTE:** Entidade detentora dos produtos alimentícios e contratante da representação.
+  * **PRODUTO:** Itens do catálogo comercial com dados fiscais, físicos e preço base.
+  * **LOTE:** Rastreabilidade de produção, controle de validade e datas.
+  * **SUPER_MERCADO:** Entidade matriz compradora no varejo.
+  * **LOJA:** Filial física compradora e ponto de entrega/reposição de produtos.
+  * **CONTATO:** Pessoas físicas interlocutoras de cada setor (Fiscal, Pricing, Compras, Logística).
+  * **PROMOTOR:** Agente terceirizado responsável pelo abastecimento em gôndola.
+  * **REPRESENTANTE:** Agente comercial responsável pelas negociações e emissão de pedidos.
+  * **PEDIDO:** Transação comercial consolidada entre fabricante, representante, rede e loja.
+  * **ITEM_PEDIDO:** Detalhe das linhas do pedido, relacionando cada produto negociado à sua respectiva quantidade e preço fechado na venda.
+  * **VISITA:** Atendimento presencial para conferência de estoque de gôndola e validades.
+
 ### **1. FABRICANTE**
+
+Entidade detentora dos produtos alimentícios e contratante da representação.
 
 * **ID_FABRICANTE** (Chave Primária): Identificador único do fabricante no sistema.
 * **NM_RAZAO_SOCIAL**: Razão social completa da empresa fabricante.
