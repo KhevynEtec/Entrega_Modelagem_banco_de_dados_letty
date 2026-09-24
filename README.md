@@ -254,7 +254,7 @@
 * **REPRESENTANTE para PEDIDO (Fecha):** (1,n) - (1,n) — Um representante fecha um ou vários pedidos, e um pedido é fechado por um ou vários representantes.
 * **PEDIDO para ITEM_PEDIDO (CONTEM):** (1,n) - (1,n) — Um pedido contém um ou vários itens de pedido, e um item de pedido pertence a um ou vários pedidos.
 * **PROMOTOR para VISITA (realiza):** (1,n) - (1,n) — Um promotor realiza uma ou várias visitas, e uma visita é realizada por um ou vários promotores.
-* 
+  
 ---
 
 ## 7. Diagrama Entidade-Relacionamento (DER)
