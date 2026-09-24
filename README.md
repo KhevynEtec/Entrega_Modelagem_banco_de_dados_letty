@@ -90,7 +90,7 @@
 ## 5. Dicionário de Dados Conceitual (Preliminar)
 
 *(O Dicionário de Dados Conceitual será fornecido em documento/tabela externa)*
-[![Dicionário de Dados]](./Dicionário_de_Dados_letty_quinta_Vs_03.html)
+[![Dicionário de Dados]](./Dicionário_de_Dados_letty_quinta_Vs_06.html)
 
 
 ## 6. Modelagem Conceitual (Entidades, Atributos, Relacionamentos)
