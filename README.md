@@ -45,7 +45,7 @@
   3. **Negociação e Registro de Pedidos:** Reunião periódica com o comprador da rede, fechamento e lançamento de pedidos com múltiplos itens, quantidade e preço negociado.
   4. **Faturamento, Lote e Logística:** Processamento do pedido pela fábrica, emissão do Lote de produção com datas de fabricação/validade e entrega na loja recebedora.
   5. **Auditoria e Promotoria (Visita PDV):** Reposição de mercadorias por promotor terceirizado, acompanhamento de estoque de gôndola e conferência de validades.
-  6. **Ações Promocionais e Gestão de Validade:** Identificação de itens com baixo giro/proximidade do vencimento e aplicação de promoções para evitar perdas.
+  6. **Gestão de Validade:** Identificação de itens com baixo giro/proximidade do vencimento para evitar perdas.
 
 *(Os fluxogramas dos processos chave serão disponibilizados em imagem/arquivo anexo no repositório)*
 [![Fluxograma]](./_Fluxograma.png)
