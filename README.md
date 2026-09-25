@@ -58,13 +58,13 @@
 ### 3.1 Requisitos Funcionais
 * **RF01 - Gestão Cadastral:** O sistema deve permitir o cadastro de Fabricantes, Produtos, Redes de Supermercados, Lojas/Filiais, Contatos por setor e Promotores terceirizados.
 * **RF02 - Registro de Lotes:** O sistema deve permitir o vínculo de Lotes a Produtos, armazenando data de fabricação, data de validade e quantidade produzida.
-* **RF03 - Emissão de Pedidos:** O sistema deve permitir criar pedidos de venda vinculados a uma Rede, Loja e Representante, contendo um ou mais produtos com suas respectivas quantidades e preços negociados.
+* **RF03 - Emissão de Pedidos:** O sistema deve permitir criar pedidos de venda vinculados a uma Rede e Loja, contendo um ou mais produtos com suas respectivas quantidades e preços negociados.
 * **RF04 - Gestão de Status de Pedido:** O sistema deve registrar o ciclo de vida do pedido nos status: Negociação, Registrado, Aprovado, Faturado, Em Transporte, Entregue, Entregue Parcialmente, Recusado/Cortado e Cancelado.
 * **RF05 - Auditoria de Visita e Gôndola:** O sistema deve registrar as visitas presenciais dos promotores nas lojas, capturando horário de início/fim, contagem de estoque e menor data de validade encontrada em gôndola.
 * **RF06 - Alertas de Validade e Ruptura:** O sistema deve emitir relatórios/alertas prévios sobre lotes com vencimento próximo e produtos com estoque crítico/baixo giro.
 
 ### 3.2 Requisitos Não Funcionais
-* **RNF01 - Integridade e Mecanismo de Armazenamento:** O sistema deve utilizar SGBD MySQL 8 com mecanismo InnoDB para garantir transações ACID e integridade referencial por chaves estrangeiras.
+* **RNF01 - Integridade e Mecanismo de Armazenamento:** O sistema deve utilizar SGBD MySQL 8 com mecanismo InnoDB para garantir transações ACID e integridade referencial.
 * **RNF02 - Codificação de Caracteres:** Uso exclusivo do charset `utf8mb4` com collation `utf8mb4_0900_ai_ci` para suporte a acentuação e símbolos.
 * **RNF03 - Segurança e Proteção de Dados (LGPD):** O acesso a dados pessoais (CPF, e-mail, telefone de promotores e contatos) deve ser restrito ao Usuário Principal e totalmente auditado via log de acesso do SGBD (`audit_log` ou `mysql.general_log`), em conformidade com a Lei nº 13.709/2018 (art. 5º, I e art. 7º, V).
 * **RNF04 - Restrição de Acesso Operacional:** Somente o Usuário Principal possui permissões globais de inserção, alteração e exclusão de cadastros. Registros de transações (pedidos e visitas) devem ser imutáveis para garantir histórico fiscal e auditoria.
@@ -104,9 +104,7 @@
   * **LOJA:** Filial física compradora e ponto de entrega/reposição de produtos.
   * **CONTATO:** Pessoas físicas interlocutoras de cada setor (Fiscal, Pricing, Compras, Logística).
   * **PROMOTOR:** Agente terceirizado responsável pelo abastecimento em gôndola.
-  * **REPRESENTANTE:** Agente comercial responsável pelas negociações e emissão de pedidos.
-  * **PEDIDO:** Transação comercial consolidada entre fabricante, representante, rede e loja.
-  * **ITEM_PEDIDO:** Detalhe das linhas do pedido, relacionando cada produto negociado à sua respectiva quantidade e preço fechado na venda.
+  * **PEDIDO:** Transação comercial consolidada entre fabricante, rede e loja.
   * **VISITA:** Atendimento presencial para conferência de estoque de gôndola e validades.
 
 ### **1. FABRICANTE**
@@ -128,7 +126,6 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 ### **2. PRODUTO**
 
 * **ID_PRODUTO** (Chave Primária): Identificador único do produto no sistema.
-* **ID_FABRICANTE** (Chave Estrangeira): Vincula o produto ao seu fabricante.
 * **CD_EAN**: Código de barras global do produto (Chave única).
 * **CD_NCM**: Nomenclatura Comum do Mercosul para fins de tributação fiscal.
 * **DS_PRODUTO**: Descrição comercial detalhada do item.
@@ -146,7 +143,6 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 ### **3. LOTE**
 
 * **ID_LOTE** (Chave Primária): Identificador do lote no banco de dados.
-* **ID_PRODUTO** (Chave Estrangeira): Chave estrangeira que vincula o lote a um produto.
 * **CD_NUMERO_LOTE**: Código de controle de lote atribuído pela fábrica.
 * **QT_PRODUZIDA**: Quantidade total de unidades fabricadas na remessa.
 * **DT_FABRICACAO**: Data de industrialização da mercadoria.
@@ -172,7 +168,6 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 ### **5. LOJA**
 
 * **ID_LOJA** (Chave Primária): Identificador interno da filial/loja.
-* **ID_REDE** (Chave Estrangeira): Referência à rede/matriz proprietária.
 * **CD_CODIGO_LOJA_REDE**: Código de identificação interno da loja no sistema da própria rede.
 * **NM_LOJA**: Nome de identificação da filial (ex.: "Loja 02 - Centro").
 * **CD_CNPJ**: CNPJ próprio da filial física (Chave única).
@@ -185,8 +180,6 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 ### **6. CONTATO**
 
 * **ID_CONTATO** (Chave Primária): Identificador único do registro de contato.
-* **ID_REDE** (Chave Estrangeira): Associação obrigatória do profissional à rede compradora.
-* **ID_LOJA** (Chave Estrangeira, *(Opcional)*): Vínculo com uma loja/filial específica, se aplicável.
 * **NM_CONTATO**: Nome completo do interlocutor.
 * **DS_SETOR**: Setor do profissional (ex.: Fiscal, Logística, Pricing, Compras).
 * **DS_CARGO**: Cargo ou função desempenhada na empresa cliente.
@@ -205,19 +198,9 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 
 ---
 
-### **8. REPRESENTANTE**
-
-* **ID_REPRESENTANTE** (Chave Primária): Identificador único do representante comercial.
-* *(Modelado no sistema sem atributos adicionais por decisão de projeto).*
-
----
-
-### **9. PEDIDO**
+### **8. PEDIDO**
 
 * **ID_PEDIDO** (Chave Primária): Identificador do pedido de venda.
-* **ID_REDE** (Chave Estrangeira): Identificador da rede cliente compradora.
-* **ID_REPRESENTANTE** (Chave Estrangeira): Identificador do representante emissor do pedido.
-* **ID_LOJA** (Chave Estrangeira): Identificador da loja recebedora da entrega.
 * **DT_PEDIDO**: Data de emissão e negociação do pedido.
 * **DT_PREVISTA_ENTREGA** *(Opcional)*: Data negociada para descarregamento na loja.
 * **VL_PRECO_TOTAL**: Valor monetário total consolidado dos itens do pedido.
@@ -226,22 +209,9 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 
 ---
 
-### **10. ITEM_PEDIDO**
-
-* **ID_ITEM_PEDIDO** (Chave Primária): Identificador único da linha de item do pedido.
-* **ID_PEDIDO** (Chave Estrangeira): Vincula o item ao pedido correspondente.
-* **ID_PRODUTO** (Chave Estrangeira): Identifica o produto negociado.
-* **QT_PEDIDA**: Quantidade comercializada do produto no pedido.
-* **VL_PRECO_NEGOCIADO**: Preço unitário fechado/negociado para o produto na venda.
-
----
-
-### **11. VISITA**
+### **9. VISITA**
 
 * **ID_VISITA** (Chave Primária): Código identificador da auditoria/visita presencial.
-* **ID_PROMOTOR** (Chave Estrangeira): Identificador do promotor responsável pela visita.
-* **ID_LOJA** (Chave Estrangeira): Identificador da loja auditada.
-* **ID_PRODUTO** (Chave Estrangeira): Produto verificado em gôndola/estoque durante a visita.
 * **DT_VISITA**: Data do atendimento em loja.
 * **HR_INICIO**: Horário de início do atendimento.
 * **HR_FIM**: Horário de término do atendimento no PDV.
@@ -254,19 +224,17 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 - **Relacionamentos e Cardinalidades:**
 
 * **FABRICANTE para PROMOTOR (envia):** (1,n) - (1,n) — Um fabricante envia um ou vários promotores, e um promotor é enviado por um ou vários fabricantes.
-* **FABRICANTE para REPRESENTANTE (representa):** (1,n) - (1,n) — Um fabricante vincula representação comercial com um ou vários representantes, e um representante representa um ou vários fabricantes.
 * **FABRICANTE para PRODUTO (fabrica):** (1,n) - (1,n) — Um fabricante fabrica um ou vários produtos, e um produto é fabricado por um ou vários fabricantes.
-* **SUPER_MERCADO para LOJA (1:n / possui):** (1,n) - (1,n) — Uma rede de supermercado possui uma ou várias lojas, e uma loja pertence a uma ou várias redes.
+* **FABRICANTE para PEDIDO (fecha):** (1,n) - (1,n) — Um fabricante fecha um ou vários pedidos, e um pedido é fechado por um ou vários fabricantes
+* **SUPER_MERCADO para LOJA (possui):** (1,n) - (1,n) — Uma rede de supermercado possui uma ou várias lojas, e uma loja pertence a uma ou várias redes.
 * **SUPER_MERCADO para CONTATO (tem):** (1,n) - (1,n) — Uma rede tem um ou vários contatos, e um contato pertence a uma ou várias redes.
 * **SUPER_MERCADO para PEDIDO (registra):** (1,n) - (1,n) — Uma rede registra um ou vários pedidos, e um pedido é registrado por uma ou várias redes.
 * **LOJA para CONTATO (possui):** (1,n) - (1,n) — Uma loja possui um ou vários contatos, e um contato está vinculado a uma ou várias lojas.
 * **LOJA para PEDIDO (destina-se a):** (1,n) - (1,n) — Um pedido destina-se a uma ou várias lojas, e uma loja recebe um ou vários pedidos.
 * **LOJA para VISITA (recebe):** (1,n) - (1,n) — Uma loja recebe uma ou várias visitas, e uma visita é realizada em uma ou várias lojas.
 * **PRODUTO para LOTE (possui):** (1,n) - (1,n) — Um produto possui um ou vários lotes, e um lote pertence a um ou vários produtos.
-* **PRODUTO para ITEM_PEDIDO (DE):** (1,n) - (1,n) — Um produto compõe um ou vários itens de pedido, e um item de pedido é de um ou vários produtos.
+* **PRODUTO para PEDIDO (contém):** (1,n) - (1,n) — Um produto compõe um ou vários pedidos, e um pedido contém um ou vários produtos.
 * **PRODUTO para VISITA (verifica):** (1,n) - (1,n) — Um produto é verificado em uma ou várias visitas, e uma visita verifica um ou vários produtos.
-* **REPRESENTANTE para PEDIDO (Fecha):** (1,n) - (1,n) — Um representante fecha um ou vários pedidos, e um pedido é fechado por um ou vários representantes.
-* **PEDIDO para ITEM_PEDIDO (CONTEM):** (1,n) - (1,n) — Um pedido contém um ou vários itens de pedido, e um item de pedido pertence a um ou vários pedidos.
 * **PROMOTOR para VISITA (realiza):** (1,n) - (1,n) — Um promotor realiza uma ou várias visitas, e uma visita é realizada por um ou vários promotores.
   
 ---
@@ -275,7 +243,7 @@ Entidade detentora dos produtos alimentícios e contratante da representação.
 
 *(O Diagrama Entidade-Relacionamento [DER] encontra-se anexado separadamente como arquivo de imagem no repositório)*
 
-<img width="1400" height="1600" alt="image" src="https://github.com/KhevynEtec/Entrega_Modelagem_banco_de_dados_letty/blob/main/DER_Conceitual_Ednilson_quinta_final_08.png" />
+<img width="1400" height="1600" alt="image" src="https://github.com/KhevynEtec/Entrega_Modelagem_banco_de_dados_letty/blob/main/DER_Conceitual_Ednilson_quinta_final_09.png" />
 
 [![Diagrama Entidade-Relacionamento]](./DER_Conceitual_Ednilson_quinta_final_09.png)
 
@@ -287,8 +255,7 @@ A modelagem do sistema da Letty Gestão Comercial foi concebida para sanar diret
 
 1. **Separação entre Matriz (`SUPER_MERCADO`) e Filial (`LOJA`):** A escolha de desacoplar a rede matriz das lojas físicas é fundamental para a realidade do varejo alimentício. A negociação e os contatos de setores (Fiscal, Compras) ocorrem no âmbito da matriz, enquanto o faturamento, a entrega logística, a apuração de estoque e a atuação dos promotores ocorrem exclusivamente na filial física.
 2. **Modelagem do `LOTE` desvinculada do `PEDIDO` direto:** Os lotes de produção pertencem à entidade `PRODUTO`. Essa abstração permite que o estoque de determinado lote seja rastreado em gôndola durante as auditorias da `VISITA` sem forçar o cliente/comprador a escolher lotes na fase de negociação do `PEDIDO`.
-3. **Composição Multitem em `PEDIDO` e `VISITA`:** O uso do agrupamento fracionado de itens em `PEDIDO` (`ITEM_PEDIDO`) garante que uma única venda contenha múltiplos produtos com preços e quantidades negociados independentes.
-4. **Simplificação da Entidade `REPRESENTANTE`:** Como a empresa conta com estrutura enxuta voltada à gestão comercial direta, a entidade `REPRESENTANTE` foi mantida como Chave Primária identificadora simples no modelo lógico para garantir integridade e expansões futuras, sem overhead de atributos redundantes nesta etapa.
+3. **Relacionamento Direto entre `PRODUTO` e `PEDIDO`:** No modelo conceitual, mantemos a associação N:N direta entre `PRODUTO` e `PEDIDO` para representar a inclusão de itens e seus valores negociados, deixando a resolução em entidade associativa para a etapa de modelagem lógica.
 
 ---
 
