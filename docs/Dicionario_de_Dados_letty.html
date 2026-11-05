@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dicionário de Dados — Letty Gestão Comercial</title>
+<style>
+:root{--bg:#fff;--fg:#1d2330;--mut:#5b6475;--line:#d9deea;--head:#eef1f8;--acc:#1f4fd8;--code:#f4f6fb}
+@media (prefers-color-scheme:dark){:root{--bg:#14171f;--fg:#e6e9f2;--mut:#9aa3b8;--line:#2c3243;--head:#1d2230;--acc:#7da2ff;--code:#1a1e2a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+h1{font-size:26px;margin:.2em 0}h2{font-size:20px;margin:2em 0 .5em;border-bottom:2px solid var(--line);padding-bottom:6px}
+h3{font-size:16px;margin:1.8em 0 .3em;color:var(--acc)}p,li{color:var(--fg)}.mut{color:var(--mut)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px}th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--head);white-space:nowrap}tr:last-child td{border-bottom:0}
+code,.f{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--code);padding:1px 5px;border-radius:4px}
+.f{display:block;padding:8px 10px;margin:6px 0;overflow-x:auto;white-space:pre-wrap}
+nav a{display:inline-block;margin:2px 8px 2px 0;color:var(--acc);text-decoration:none;font-size:13px}
+.k{font-weight:600}
+</style></head><body><main>
+<h1>Dicionário de Dados — Letty Gestão Comercial LTDA</h1>
+<p class="mut">Versão 8.0 · 03/11/2026 · SGBD MySQL 8 (InnoDB) · <code>utf8mb4</code> / <code>utf8mb4_0900_ai_ci</code> · gerado a partir de <code>docs/script.sql</code> e do modelo lógico (brModelo).</p>
+
+<nav><a href="#t-super_mercado">SUPER_MERCADO</a><a href="#t-fabricante">FABRICANTE</a><a href="#t-promotor">PROMOTOR</a><a href="#t-loja">LOJA</a><a href="#t-endereco_fabricante">ENDERECO_FABRICANTE</a><a href="#t-endereco_rede">ENDERECO_REDE</a><a href="#t-email_loja">EMAIL_LOJA</a><a href="#t-contato">CONTATO</a><a href="#t-produto">PRODUTO</a><a href="#t-lote">LOTE</a><a href="#t-contrato">CONTRATO</a><a href="#t-comissao">COMISSAO</a><a href="#t-pedido">PEDIDO</a><a href="#t-item_pedido">ITEM_PEDIDO</a><a href="#t-visita">VISITA</a><a href="#t-item_visita">ITEM_VISITA</a><a href="#t-vencimento_prod">VENCIMENTO_PROD</a><a href="#t-envia">ENVIA</a><a href="#t-telefone_fabricante">TELEFONE_FABRICANTE</a><a href="#t-email_fabricante">EMAIL_FABRICANTE</a><a href="#t-telefone_promotor">TELEFONE_PROMOTOR</a><a href="#t-telefone_loja">TELEFONE_LOJA</a><a href="#t-telefone_contato">TELEFONE_CONTATO</a><a href="#t-email_contato">EMAIL_CONTATO</a></nav>
+<h2>1. Visão geral</h2>
+<p>O modelo cobre o ecossistema comercial da Letty: fabricantes (com endereço, telefones e e-mails), contratos e comissões, produtos e lotes, redes de supermercados e suas lojas, contatos, promotores terceirizados, pedidos com itens, visitas de auditoria em gôndola e ocorrências de produtos vencidos.</p>
+<p><b>Fluxo de dados.</b> O fluxo começa no cadastro de <code>FABRICANTE</code>, <code>CONTRATO</code>, <code>SUPER_MERCADO</code> (com <code>LOJA</code> e <code>CONTATO</code>) e <code>PRODUTO</code>. Com o cadastro ativo, a negociação gera um <code>PEDIDO</code> com seus <code>ITEM_PEDIDO</code>, destinado a uma loja. O <code>PROMOTOR</code> visita a loja e registra a <code>VISITA</code>, conferindo em <code>ITEM_VISITA</code> a quantidade e a menor validade em gôndola. Produtos vencidos viram <code>VENCIMENTO_PROD</code>. Cada contrato gera <code>COMISSAO</code> conforme as vendas.</p>
+<h2>2. Convenções</h2>
+<p><b>Notação formal:</b> <code>=</code> é composto de · <code>+</code> e · <code>( )</code> opcional · <code>@</code> identificador (chave primária) · <code>@( a + b )</code> chave composta.</p>
+<p><b>Prefixos:</b> <code>id_</code> identificador · <code>nm_</code> nome · <code>dt_</code> data · <code>hr_</code> hora · <code>qt_</code> quantidade · <code>vl_</code> valor monetário · <code>ds_</code> descrição · <code>in_</code> indicador booleano · <code>tp_</code> tipo/domínio · <code>sg_</code> sigla · <code>nr_</code> número · <code>cd_</code> código. Alguns nomes seguem o modelo lógico sem prefixo (<code>cnpj</code>, <code>cpf</code>, <code>ean</code>, <code>ncm</code>, <code>cep</code>, <code>email</code>, <code>telefone</code>).</p>
+<p><b>Exclusão (ON DELETE):</b> <code>RESTRICT</code> impede apagar o registro pai enquanto houver filhos (histórico fiscal, RO02); <code>CASCADE</code> apaga os dependentes junto com o pai.</p>
+<h2>3. Relacionamentos e chaves estrangeiras</h2>
+<div class="wrap"><table><tr><th>Entidade pai</th><th>Relacionamento</th><th>Entidade filha</th><th>Chave estrangeira</th><th>Cardinalidade</th><th>ON DELETE</th></tr>
+<tr><td>SUPER_MERCADO</td><td>possui</td><td>LOJA</td><td><code>loja.id_rede</code> → <code>super_mercado.id_rede</code></td><td>(1,1)–(1,n)</td><td>RESTRICT</td></tr>
+<tr><td>FABRICANTE</td><td>possui</td><td>ENDERECO_FABRICANTE</td><td><code>endereco_fabricante.id_fabricante</code> → <code>fabricante.id_fabricante</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>SUPER_MERCADO</td><td>possui</td><td>ENDERECO_REDE</td><td><code>endereco_rede.id_rede</code> → <code>super_mercado.id_rede</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>LOJA</td><td>possui</td><td>EMAIL_LOJA</td><td><code>email_loja.id_loja</code> → <code>loja.id_loja</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>SUPER_MERCADO</td><td>tem</td><td>CONTATO</td><td><code>contato.id_rede</code> → <code>super_mercado.id_rede</code></td><td>(1,1)–(0,n)</td><td>CASCADE</td></tr>
+<tr><td>FABRICANTE</td><td>fabrica</td><td>PRODUTO</td><td><code>produto.id_fabricante</code> → <code>fabricante.id_fabricante</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PRODUTO</td><td>possui</td><td>LOTE</td><td><code>lote.id_produto</code> → <code>produto.id_produto</code></td><td>(1,1)–(0,n)</td><td>CASCADE</td></tr>
+<tr><td>FABRICANTE</td><td>firma</td><td>CONTRATO</td><td><code>contrato.id_fabricante</code> → <code>fabricante.id_fabricante</code></td><td>(1,1)–(1,n)</td><td>RESTRICT</td></tr>
+<tr><td>CONTRATO</td><td>gera</td><td>COMISSAO</td><td><code>comissao.id_contrato</code> → <code>contrato.id_contrato</code></td><td>(1,1)–(0,n)</td><td>CASCADE</td></tr>
+<tr><td>LOJA</td><td>destina-se a</td><td>PEDIDO</td><td><code>pedido.id_loja</code> → <code>loja.id_loja</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>SUPER_MERCADO</td><td>registra</td><td>PEDIDO</td><td><code>pedido.id_rede</code> → <code>super_mercado.id_rede</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>FABRICANTE</td><td>fecha</td><td>PEDIDO</td><td><code>pedido.id_fabricante</code> → <code>fabricante.id_fabricante</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PRODUTO</td><td>compõe</td><td>ITEM_PEDIDO</td><td><code>item_pedido.id_produto</code> → <code>produto.id_produto</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PEDIDO</td><td>contém</td><td>ITEM_PEDIDO</td><td><code>item_pedido.id_pedido</code> → <code>pedido.id_pedido</code></td><td>(1,1)–(1,n)</td><td>RESTRICT</td></tr>
+<tr><td>LOJA</td><td>recebe</td><td>VISITA</td><td><code>visita.id_loja</code> → <code>loja.id_loja</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PROMOTOR</td><td>realiza</td><td>VISITA</td><td><code>visita.id_promotor</code> → <code>promotor.id_promotor</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PRODUTO</td><td>é verificado em</td><td>ITEM_VISITA</td><td><code>item_visita.id_produto</code> → <code>produto.id_produto</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>VISITA</td><td>verifica</td><td>ITEM_VISITA</td><td><code>item_visita.id_visita</code> → <code>visita.id_visita</code></td><td>(1,1)–(1,n)</td><td>RESTRICT</td></tr>
+<tr><td>LOJA</td><td>relata</td><td>VENCIMENTO_PROD</td><td><code>vencimento_prod.id_loja</code> → <code>loja.id_loja</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PRODUTO</td><td>sofre</td><td>VENCIMENTO_PROD</td><td><code>vencimento_prod.id_produto</code> → <code>produto.id_produto</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>FABRICANTE</td><td>envia</td><td>ENVIA</td><td><code>envia.id_fabricante</code> → <code>fabricante.id_fabricante</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PROMOTOR</td><td>é enviado por</td><td>ENVIA</td><td><code>envia.id_promotor</code> → <code>promotor.id_promotor</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>FABRICANTE</td><td>possui</td><td>TELEFONE_FABRICANTE</td><td><code>telefone_fabricante.id_fabricante</code> → <code>fabricante.id_fabricante</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>FABRICANTE</td><td>possui</td><td>EMAIL_FABRICANTE</td><td><code>email_fabricante.id_fabricante</code> → <code>fabricante.id_fabricante</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>PROMOTOR</td><td>possui</td><td>TELEFONE_PROMOTOR</td><td><code>telefone_promotor.id_promotor</code> → <code>promotor.id_promotor</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>LOJA</td><td>possui</td><td>TELEFONE_LOJA</td><td><code>telefone_loja.id_loja</code> → <code>loja.id_loja</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>CONTATO</td><td>possui</td><td>TELEFONE_CONTATO</td><td><code>telefone_contato.id_contato</code> → <code>contato.id_contato</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+<tr><td>CONTATO</td><td>possui</td><td>EMAIL_CONTATO</td><td><code>email_contato.id_contato</code> → <code>contato.id_contato</code></td><td>(1,1)–(0,n)</td><td>RESTRICT</td></tr>
+</table></div>
+<h3>Entidades associativas</h3>
+<p>Os relacionamentos N:N do modelo conceitual viraram entidades próprias no modelo lógico:</p>
+<div class="wrap"><table><tr><th>Entidade</th><th>Relacionamento N:N resolvido</th><th>Atributos próprios</th><th>Chave</th></tr>
+<tr><td>ITEM_PEDIDO</td><td>PEDIDO × PRODUTO</td><td>qt_solicitada, vl_preco_negociado</td><td>id_item_pedido; único (id_pedido, id_produto)</td></tr>
+<tr><td>ITEM_VISITA</td><td>VISITA × PRODUTO</td><td>qt_estoque_gondola, dt_validade_encontrada</td><td>id_item_visita; único (id_visita, id_produto)</td></tr>
+<tr><td>ENVIA</td><td>FABRICANTE × PROMOTOR</td><td>nenhum</td><td>(id_fabricante, id_promotor)</td></tr>
+</table></div>
+<h2>4. Dicionário por entidade</h2>
+<h3 id="t-super_mercado">SUPER_MERCADO</h3><span class="f">SUPER_MERCADO = @ID_REDE + CNPJ + NM_RAZAO_SOCIAL + (DS_PORTAL_URL) + DT_INICIO_RELACIONAMENTO + NM_REPRESENTANTE_GERAL + DS_INSCRICAO_ESTADUAL + NM_FANTASIA</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_rede</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador da rede (matriz compradora).</td></tr>
+<tr><td class='k'>cnpj</td><td><code>VARCHAR(14)</code></td><td></td><td>Sim</td><td>Sim</td><td></td><td></td><td>CNPJ da matriz; único (RN02).</td></tr>
+<tr><td class='k'>nm_razao_social</td><td><code>VARCHAR(120)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Razão social registrada.</td></tr>
+<tr><td class='k'>ds_portal_url</td><td><code>VARCHAR(150)</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Endereço do portal de pedidos da rede, quando existe.</td></tr>
+<tr><td class='k'>dt_inicio_relacionamento</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Data do primeiro atendimento à rede.</td></tr>
+<tr><td class='k'>nm_representante_geral</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Gestor ou comprador principal da rede.</td></tr>
+<tr><td class='k'>ds_inscricao_estadual</td><td><code>VARCHAR(20)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Inscrição estadual para faturamento.</td></tr>
+<tr><td class='k'>nm_fantasia</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Nome fantasia.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_rede; único em cnpj.</p>
+<h3 id="t-fabricante">FABRICANTE</h3><span class="f">FABRICANTE = @ID_FABRICANTE + CNPJ + NM_RAZAO_SOCIAL + DS_INSCRICAO_ESTADUAL + NM_FANTASIA</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do fabricante.</td></tr>
+<tr><td class='k'>cnpj</td><td><code>CHAR(14)</code></td><td></td><td>Sim</td><td>Sim</td><td></td><td></td><td>CNPJ do fabricante; único (RN02).</td></tr>
+<tr><td class='k'>nm_razao_social</td><td><code>VARCHAR(120)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Razão social registrada.</td></tr>
+<tr><td class='k'>ds_inscricao_estadual</td><td><code>VARCHAR(20)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Inscrição estadual para emissão fiscal.</td></tr>
+<tr><td class='k'>nm_fantasia</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Nome fantasia.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_fabricante; único em cnpj.</p>
+<h3 id="t-promotor">PROMOTOR</h3><span class="f">PROMOTOR = @ID_PROMOTOR + CPF + NM_EMPRESA_TERCEIRIZADA + NM_PROMOTOR</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_promotor</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do promotor.</td></tr>
+<tr><td class='k'>cpf</td><td><code>CHAR(11)</code></td><td></td><td>Sim</td><td>Sim</td><td></td><td></td><td>CPF do promotor; único (RN02). Dado pessoal (LGPD).</td></tr>
+<tr><td class='k'>nm_empresa_terceirizada</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Agência terceirizada à qual o promotor pertence.</td></tr>
+<tr><td class='k'>nm_promotor</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Nome completo do promotor.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_promotor; único em cpf.</p>
+<h3 id="t-loja">LOJA</h3><span class="f">LOJA = @ID_LOJA + ID_REDE + CNPJ + CD_LOJA_REDE + NM_LOJA + IN_ATIVA</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_loja</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador da loja (filial).</td></tr>
+<tr><td class='k'>id_rede</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em super_mercado.id_rede</td><td></td><td>Rede (matriz) à qual a loja pertence.</td></tr>
+<tr><td class='k'>cnpj</td><td><code>VARCHAR(14)</code></td><td></td><td>Sim</td><td>Sim</td><td></td><td></td><td>CNPJ próprio da filial; único (RN02).</td></tr>
+<tr><td class='k'>cd_loja_rede</td><td><code>VARCHAR(20)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Código da loja no sistema da rede (ex.: LJ-01).</td></tr>
+<tr><td class='k'>nm_loja</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Nome da unidade (ex.: &quot;Estrela - Loja Centro&quot;).</td></tr>
+<tr><td class='k'>in_ativa</td><td><code>BOOLEAN</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Indica se a loja está operante para entregas e visitas.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_loja; único em cnpj.</p>
+<h3 id="t-endereco_fabricante">ENDERECO_FABRICANTE</h3><span class="f">ENDERECO_FABRICANTE = @ID_ENDERECO + ID_FABRICANTE + DS_LOGRADOURO + NR_ENDERECO + (DS_COMPLEMENTO) + NM_BAIRRO + SG_ESTADO + CEP</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_endereco</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do endereço.</td></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em fabricante.id_fabricante</td><td></td><td>Fabricante dono do endereço.</td></tr>
+<tr><td class='k'>ds_logradouro</td><td><code>VARCHAR(120)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Logradouro (rua, avenida, rodovia).</td></tr>
+<tr><td class='k'>nr_endereco</td><td><code>VARCHAR(15)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Número do endereço (aceita &quot;Km 18&quot;, &quot;S/N&quot;).</td></tr>
+<tr><td class='k'>ds_complemento</td><td><code>VARCHAR(80)</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Complemento (galpão, bloco, loja, andar).</td></tr>
+<tr><td class='k'>nm_bairro</td><td><code>VARCHAR(80)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Bairro.</td></tr>
+<tr><td class='k'>sg_estado</td><td><code>CHAR(2)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Sigla da UF.</td></tr>
+<tr><td class='k'>cep</td><td><code>CHAR(8)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>CEP, somente dígitos.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_endereco.</p>
+<h3 id="t-endereco_rede">ENDERECO_REDE</h3><span class="f">ENDERECO_REDE = @ID_ENDERECO + ID_REDE + DS_LOGRADOURO + NR_ENDERECO + (DS_COMPLEMENTO) + NM_BAIRRO + SG_ESTADO + CEP</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_endereco</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do endereço.</td></tr>
+<tr><td class='k'>id_rede</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em super_mercado.id_rede</td><td></td><td>Rede dona do endereço.</td></tr>
+<tr><td class='k'>ds_logradouro</td><td><code>VARCHAR(120)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Logradouro (rua, avenida, rodovia).</td></tr>
+<tr><td class='k'>nr_endereco</td><td><code>VARCHAR(15)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Número do endereço (aceita &quot;Km 18&quot;, &quot;S/N&quot;).</td></tr>
+<tr><td class='k'>ds_complemento</td><td><code>VARCHAR(80)</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Complemento (galpão, bloco, loja, andar).</td></tr>
+<tr><td class='k'>nm_bairro</td><td><code>VARCHAR(80)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Bairro.</td></tr>
+<tr><td class='k'>sg_estado</td><td><code>CHAR(2)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Sigla da UF.</td></tr>
+<tr><td class='k'>cep</td><td><code>CHAR(8)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>CEP, somente dígitos.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_endereco.</p>
+<h3 id="t-email_loja">EMAIL_LOJA</h3><span class="f">EMAIL_LOJA = @ID_EMAIL + ID_LOJA + EMAIL</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_email</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do e-mail.</td></tr>
+<tr><td class='k'>id_loja</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em loja.id_loja</td><td></td><td>Referência a loja.</td></tr>
+<tr><td class='k'>email</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Endereço de e-mail.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_email.</p>
+<h3 id="t-contato">CONTATO</h3><span class="f">CONTATO = @ID_CONTATO + ID_REDE + NM_CONTATO + DS_CARGO + DS_SETOR</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_contato</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do contato.</td></tr>
+<tr><td class='k'>id_rede</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em super_mercado.id_rede</td><td></td><td>Rede em que o contato trabalha.</td></tr>
+<tr><td class='k'>nm_contato</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Nome completo do contato. Dado pessoal (LGPD).</td></tr>
+<tr><td class='k'>ds_cargo</td><td><code>VARCHAR(50)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Cargo exercido.</td></tr>
+<tr><td class='k'>ds_setor</td><td><code>VARCHAR(50)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Setor (Fiscal, Compras, Logística, Pricing).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_contato.</p>
+<h3 id="t-produto">PRODUTO</h3><span class="f">PRODUTO = @ID_PRODUTO + ID_FABRICANTE + EAN + QT_PESO_LIQUIDO + NCM + QT_PESO_BRUTO + DS_PRODUTO + TP_REGIME_TRIBUTARIO + TP_UNIDADE_MEDIDA + TP_EMBALAGEM + NM_MARCA + VL_PRECO_TABELA + IN_ATIVO</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_produto</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do produto.</td></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em fabricante.id_fabricante</td><td></td><td>Fabricante do produto.</td></tr>
+<tr><td class='k'>ean</td><td><code>VARCHAR(14)</code></td><td></td><td>Sim</td><td>Sim</td><td></td><td></td><td>Código de barras (EAN); único (RN02).</td></tr>
+<tr><td class='k'>qt_peso_liquido</td><td><code>DECIMAL(10,3)</code></td><td></td><td>Sim</td><td></td><td>≥ 0</td><td></td><td>Peso líquido, em kg.</td></tr>
+<tr><td class='k'>ncm</td><td><code>VARCHAR(8)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Nomenclatura Comum do Mercosul (tributação).</td></tr>
+<tr><td class='k'>qt_peso_bruto</td><td><code>DECIMAL(10,3)</code></td><td></td><td>Sim</td><td></td><td>≥ 0</td><td></td><td>Peso bruto com embalagem, em kg.</td></tr>
+<tr><td class='k'>ds_produto</td><td><code>VARCHAR(150)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Descrição comercial completa.</td></tr>
+<tr><td class='k'>tp_regime_tributario</td><td><code>VARCHAR(50)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Regime tributário (ex.: Substituição Tributária).</td></tr>
+<tr><td class='k'>tp_unidade_medida</td><td><code>VARCHAR(10)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Unidade de comercialização (ex.: UN, KG, CX).</td></tr>
+<tr><td class='k'>tp_embalagem</td><td><code>VARCHAR(30)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Tipo de acondicionamento (ex.: Pacote, Caixa, Fardo).</td></tr>
+<tr><td class='k'>nm_marca</td><td><code>VARCHAR(60)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Marca do produto.</td></tr>
+<tr><td class='k'>vl_preco_tabela</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>≥ 0</td><td></td><td>Preço de tabela, base da regra RN04.</td></tr>
+<tr><td class='k'>in_ativo</td><td><code>BOOLEAN</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Indica se o produto está ativo para venda e reposição (RN01).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_produto; único em ean.</p>
+<h3 id="t-lote">LOTE</h3><span class="f">LOTE = @ID_LOTE + ID_PRODUTO + DT_VALIDADE + QT_PRODUZIDA + DT_FABRICACAO + NUMERO_LOTE</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_lote</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do lote.</td></tr>
+<tr><td class='k'>id_produto</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em produto.id_produto</td><td></td><td>Produto ao qual o lote pertence.</td></tr>
+<tr><td class='k'>dt_validade</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td>&gt; dt_fabricacao (RN07; conferido em A02)</td><td></td><td>Data de validade do lote (RN07).</td></tr>
+<tr><td class='k'>qt_produzida</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>≥ 0</td><td></td><td>Quantidade produzida no lote.</td></tr>
+<tr><td class='k'>dt_fabricacao</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Data de fabricação.</td></tr>
+<tr><td class='k'>numero_lote</td><td><code>VARCHAR(30)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Código do lote atribuído pela fábrica.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_lote.</p>
+<h3 id="t-contrato">CONTRATO</h3><span class="f">CONTRATO = @ID_CONTRATO + ID_FABRICANTE + DT_INICIO + STATUS_CONTRATO + (META_VENDAS) + (TERRITORIO_ATUACAO) + PERCENTUAL_COMISSAO + (DT_FIM) + EXCLUSIVIDADE</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_contrato</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do contrato.</td></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em fabricante.id_fabricante</td><td></td><td>Fabricante contratante.</td></tr>
+<tr><td class='k'>dt_inicio</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Início da vigência.</td></tr>
+<tr><td class='k'>status_contrato</td><td><code>VARCHAR(30)</code></td><td></td><td>Sim</td><td></td><td>Ativo, Em Negociação, Encerrado, Suspenso</td><td></td><td>Situação do contrato.</td></tr>
+<tr><td class='k'>meta_vendas</td><td><code>DECIMAL(12,2)</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Meta de vendas pactuada.</td></tr>
+<tr><td class='k'>territorio_atuacao</td><td><code>VARCHAR(100)</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Território coberto pelo contrato.</td></tr>
+<tr><td class='k'>percentual_comissao</td><td><code>DECIMAL(5,2)</code></td><td></td><td>Sim</td><td></td><td>de 0 a 100</td><td></td><td>Percentual de comissão acordado, em %.</td></tr>
+<tr><td class='k'>dt_fim</td><td><code>DATE</code></td><td></td><td>Não</td><td></td><td>vazio ou ≥ dt_inicio</td><td></td><td>Fim da vigência, quando houver.</td></tr>
+<tr><td class='k'>exclusividade</td><td><code>BOOLEAN</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Indica cláusula de exclusividade.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_contrato.</p>
+<h3 id="t-comissao">COMISSAO</h3><span class="f">COMISSAO = @ID_COMISSAO + ID_CONTRATO + VALOR_BASE + VALOR_COMISSAO + STATUS_PAGAMENTO + PERCENTUAL_APLICADO + (DT_PAGAMENTO) + DT_APURACAO</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_comissao</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador da comissão.</td></tr>
+<tr><td class='k'>id_contrato</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em contrato.id_contrato</td><td></td><td>Contrato que originou a comissão.</td></tr>
+<tr><td class='k'>valor_base</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>≥ 0</td><td></td><td>Valor sobre o qual incide a comissão.</td></tr>
+<tr><td class='k'>valor_comissao</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Valor final = valor_base × percentual_aplicado ÷ 100 (RN10).</td></tr>
+<tr><td class='k'>status_pagamento</td><td><code>VARCHAR(30)</code></td><td></td><td>Sim</td><td></td><td>Pendente, Aprovado, Pago, Cancelado</td><td></td><td>Situação do repasse.</td></tr>
+<tr><td class='k'>percentual_aplicado</td><td><code>DECIMAL(5,2)</code></td><td></td><td>Sim</td><td></td><td>de 0 a 100</td><td></td><td>Percentual efetivamente aplicado no ciclo, em % (preserva o histórico).</td></tr>
+<tr><td class='k'>dt_pagamento</td><td><code>DATE</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Data da quitação, quando paga.</td></tr>
+<tr><td class='k'>dt_apuracao</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Data de apuração.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_comissao.</p>
+<h3 id="t-pedido">PEDIDO</h3><span class="f">PEDIDO = @ID_PEDIDO + ID_LOJA + ID_REDE + ID_FABRICANTE + DT_PEDIDO + DS_CONDICAO_PAGAMENTO + VL_PRECO_TOTAL + (DT_PREVISTA_ENTREGA) + TP_STATUS_ATUAL</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_pedido</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do pedido.</td></tr>
+<tr><td class='k'>id_loja</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em loja.id_loja</td><td></td><td>Loja de entrega.</td></tr>
+<tr><td class='k'>id_rede</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em super_mercado.id_rede</td><td></td><td>Rede compradora (cópia de loja.id_rede, conferida em A06).</td></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em fabricante.id_fabricante</td><td></td><td>Fabricante que fornece o pedido.</td></tr>
+<tr><td class='k'>dt_pedido</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Data de emissão.</td></tr>
+<tr><td class='k'>ds_condicao_pagamento</td><td><code>VARCHAR(50)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Condição de pagamento (ex.: Boleto, Faturado 30 dias).</td></tr>
+<tr><td class='k'>vl_preco_total</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>≥ 0</td><td></td><td>Valor consolidado dos itens (conferido em A07).</td></tr>
+<tr><td class='k'>dt_prevista_entrega</td><td><code>DATE</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Data prevista de entrega.</td></tr>
+<tr><td class='k'>tp_status_atual</td><td><code>VARCHAR(30)</code></td><td></td><td>Sim</td><td></td><td>Negociação, Registrado, Aprovado, Faturado, Em Transporte, Entregue, Entregue Parcialmente, Recusado/Cortado, Cancelado</td><td></td><td>Status atual do pedido.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_pedido.</p>
+<h3 id="t-item_pedido">ITEM_PEDIDO</h3><span class="f">ITEM_PEDIDO = @ID_ITEM_PEDIDO + ID_PRODUTO + ID_PEDIDO + QT_SOLICITADA + VL_PRECO_NEGOCIADO</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_item_pedido</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do item.</td></tr>
+<tr><td class='k'>id_produto</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td>Com id_pedido</td><td>existir em produto.id_produto</td><td></td><td>Produto pedido.</td></tr>
+<tr><td class='k'>id_pedido</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td>Com id_produto</td><td>existir em pedido.id_pedido</td><td></td><td>Pedido ao qual o item pertence.</td></tr>
+<tr><td class='k'>qt_solicitada</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>&gt; 0</td><td></td><td>Quantidade solicitada.</td></tr>
+<tr><td class='k'>vl_preco_negociado</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>≥ 0 (RN04: ≥ preço de tabela; conferido em A03)</td><td></td><td>Preço unitário negociado (RN04: não inferior ao de tabela).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_item_pedido; único em id_pedido, id_produto.</p>
+<h3 id="t-visita">VISITA</h3><span class="f">VISITA = @ID_VISITA + ID_LOJA + ID_PROMOTOR + HR_INICIO + HR_FIM + DT_VISITA + (DS_OBSERVACAO)</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_visita</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador da visita.</td></tr>
+<tr><td class='k'>id_loja</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em loja.id_loja</td><td></td><td>Loja visitada.</td></tr>
+<tr><td class='k'>id_promotor</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em promotor.id_promotor</td><td></td><td>Promotor que realizou a visita.</td></tr>
+<tr><td class='k'>hr_inicio</td><td><code>TIME</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Hora de chegada.</td></tr>
+<tr><td class='k'>hr_fim</td><td><code>TIME</code></td><td></td><td>Sim</td><td></td><td>≥ hr_inicio</td><td></td><td>Hora de saída.</td></tr>
+<tr><td class='k'>dt_visita</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Data da visita.</td></tr>
+<tr><td class='k'>ds_observacao</td><td><code>VARCHAR(255)</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Relato do promotor (concorrência, avarias, ações).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_visita.</p>
+<h3 id="t-item_visita">ITEM_VISITA</h3><span class="f">ITEM_VISITA = @ID_ITEM_VISITA + ID_PRODUTO + ID_VISITA + QT_ESTOQUE_GONDOLA + (DT_VALIDADE_ENCONTRADA)</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_item_visita</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do item da visita.</td></tr>
+<tr><td class='k'>id_produto</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td>Com id_visita</td><td>existir em produto.id_produto</td><td></td><td>Produto conferido.</td></tr>
+<tr><td class='k'>id_visita</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td>Com id_produto</td><td>existir em visita.id_visita</td><td></td><td>Visita em que foi conferido.</td></tr>
+<tr><td class='k'>qt_estoque_gondola</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>≥ 0</td><td></td><td>Quantidade contada em gôndola.</td></tr>
+<tr><td class='k'>dt_validade_encontrada</td><td><code>DATE</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Menor validade encontrada (base do alerta RN09).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_item_visita; único em id_visita, id_produto.</p>
+<h3 id="t-vencimento_prod">VENCIMENTO_PROD</h3><span class="f">VENCIMENTO_PROD = @ID_VENCIMENTO + ID_LOJA + ID_PRODUTO + CNPJ + NUMERO_LOTE + DT_VALIDADE + QUANTIDADE_PRODUTO_VENCIDO + DT_VENCIMENTO + (DESCRICAO) + STATUS_VENCIMENTO</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_vencimento</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador da ocorrência.</td></tr>
+<tr><td class='k'>id_loja</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em loja.id_loja</td><td></td><td>Loja onde ocorreu.</td></tr>
+<tr><td class='k'>id_produto</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em produto.id_produto</td><td></td><td>Produto vencido ou avariado.</td></tr>
+<tr><td class='k'>cnpj</td><td><code>CHAR(14)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>CNPJ da loja no momento da ocorrência.</td></tr>
+<tr><td class='k'>numero_lote</td><td><code>DECIMAL(10,0)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Número do lote informado na loja.</td></tr>
+<tr><td class='k'>dt_validade</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Validade impressa na embalagem.</td></tr>
+<tr><td class='k'>quantidade_produto_vencido</td><td><code>DECIMAL(10,2)</code></td><td></td><td>Sim</td><td></td><td>&gt; 0</td><td></td><td>Unidades encontradas vencidas.</td></tr>
+<tr><td class='k'>dt_vencimento</td><td><code>DATE</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Data da ocorrência.</td></tr>
+<tr><td class='k'>descricao</td><td><code>VARCHAR(150)</code></td><td></td><td>Não</td><td></td><td></td><td></td><td>Descrição do fato ou motivo da perda.</td></tr>
+<tr><td class='k'>status_vencimento</td><td><code>VARCHAR(30)</code></td><td></td><td>Sim</td><td></td><td>Identificado, Notificado, Descartado</td><td></td><td>Situação da ocorrência.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_vencimento.</p>
+<h3 id="t-envia">ENVIA</h3><span class="f">ENVIA = @(ID_FABRICANTE + ID_PROMOTOR)</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>PK, FK</td><td>Sim</td><td></td><td>existir em fabricante.id_fabricante</td><td></td><td>Fabricante que envia o promotor.</td></tr>
+<tr><td class='k'>id_promotor</td><td><code>INT</code></td><td>PK, FK</td><td>Sim</td><td></td><td>existir em promotor.id_promotor</td><td></td><td>Promotor enviado.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_fabricante, id_promotor.</p>
+<h3 id="t-telefone_fabricante">TELEFONE_FABRICANTE</h3><span class="f">TELEFONE_FABRICANTE = @ID_TELEFONE + ID_FABRICANTE + TELEFONE</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_telefone</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do telefone.</td></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em fabricante.id_fabricante</td><td></td><td>Referência a fabricante.</td></tr>
+<tr><td class='k'>telefone</td><td><code>VARCHAR(20)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Número de telefone (com DDD).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_telefone.</p>
+<h3 id="t-email_fabricante">EMAIL_FABRICANTE</h3><span class="f">EMAIL_FABRICANTE = @ID_EMAIL + ID_FABRICANTE + EMAIL</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_email</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do e-mail.</td></tr>
+<tr><td class='k'>id_fabricante</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em fabricante.id_fabricante</td><td></td><td>Referência a fabricante.</td></tr>
+<tr><td class='k'>email</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Endereço de e-mail.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_email.</p>
+<h3 id="t-telefone_promotor">TELEFONE_PROMOTOR</h3><span class="f">TELEFONE_PROMOTOR = @ID_TELEFONE + ID_PROMOTOR + TELEFONE</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_telefone</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do telefone.</td></tr>
+<tr><td class='k'>id_promotor</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em promotor.id_promotor</td><td></td><td>Referência a promotor.</td></tr>
+<tr><td class='k'>telefone</td><td><code>VARCHAR(20)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Número de telefone (com DDD).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_telefone.</p>
+<h3 id="t-telefone_loja">TELEFONE_LOJA</h3><span class="f">TELEFONE_LOJA = @ID_TELEFONE + ID_LOJA + TELEFONE</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_telefone</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do telefone.</td></tr>
+<tr><td class='k'>id_loja</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em loja.id_loja</td><td></td><td>Referência a loja.</td></tr>
+<tr><td class='k'>telefone</td><td><code>VARCHAR(20)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Número de telefone (com DDD).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_telefone.</p>
+<h3 id="t-telefone_contato">TELEFONE_CONTATO</h3><span class="f">TELEFONE_CONTATO = @ID_TELEFONE + ID_CONTATO + TELEFONE</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_telefone</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do telefone.</td></tr>
+<tr><td class='k'>id_contato</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em contato.id_contato</td><td></td><td>Referência a contato.</td></tr>
+<tr><td class='k'>telefone</td><td><code>VARCHAR(20)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Número de telefone (com DDD).</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_telefone.</p>
+<h3 id="t-email_contato">EMAIL_CONTATO</h3><span class="f">EMAIL_CONTATO = @ID_EMAIL + EMAIL + ID_CONTATO</span>
+<div class="wrap"><table><tr><th>Atributo</th><th>Tipo físico</th><th>Chave</th><th>Obrigatório</th><th>Único</th><th>Valores permitidos</th><th>Padrão</th><th>Significado</th></tr>
+<tr><td class='k'>id_email</td><td><code>INT</code></td><td>PK</td><td>Sim (automático)</td><td></td><td></td><td></td><td>Identificador do e-mail.</td></tr>
+<tr><td class='k'>email</td><td><code>VARCHAR(100)</code></td><td></td><td>Sim</td><td></td><td></td><td></td><td>Endereço de e-mail.</td></tr>
+<tr><td class='k'>id_contato</td><td><code>INT</code></td><td>FK</td><td>Sim</td><td></td><td>existir em contato.id_contato</td><td></td><td>Referência a contato.</td></tr>
+</table></div>
+<p class="mut">Índices: PK id_email.</p>
+<h2>5. Log de acesso (metadado operacional)</h2>
+<p>Todas as tabelas ficam sob o auditor do MySQL (<code>audit_log</code> ou, alternativamente, <code>mysql.general_log</code>). Papéis: <b>Usuário Principal</b> (gestor) e <b>Promotor</b>. Tabelas de endereço, telefone e e-mail seguem o papel da tabela pai.</p>
+<div class="wrap"><table><tr><th>Tabela</th><th>Ler</th><th>Inserir</th><th>Atualizar</th><th>Apagar</th></tr>
+<tr><td>FABRICANTE, CONTRATO, COMISSAO, SUPER_MERCADO, CONTATO, PROMOTOR, ENVIA</td><td>Usuário Principal</td><td>Usuário Principal</td><td>Usuário Principal</td><td>Nenhum papel</td></tr>
+<tr><td>PRODUTO, LOTE, LOJA</td><td>Usuário Principal, Promotor</td><td>Usuário Principal</td><td>Usuário Principal</td><td>Nenhum papel</td></tr>
+<tr><td>PEDIDO, ITEM_PEDIDO</td><td>Usuário Principal</td><td>Usuário Principal</td><td>Usuário Principal</td><td>Nenhum papel (registro imutável, RO02)</td></tr>
+<tr><td>VISITA, ITEM_VISITA</td><td>Usuário Principal, Promotor</td><td>Promotor</td><td>Promotor</td><td>Nenhum papel (registro imutável, RO02)</td></tr>
+<tr><td>VENCIMENTO_PROD</td><td>Usuário Principal, Promotor</td><td>Usuário Principal, Promotor</td><td>Usuário Principal</td><td>Nenhum papel (registro imutável, RO02)</td></tr>
+</table></div>
+<h2>6. LGPD</h2>
+<p>As tabelas <code>PROMOTOR</code>, <code>CONTATO</code> e suas tabelas de telefone e e-mail guardam dados pessoais (nome, CPF, telefone, e-mail), protegidos pela Lei 13.709/2018 (art. 5º, I). O tratamento se justifica pela execução do contrato de gestão comercial (art. 7º, V). O acesso é restrito ao Usuário Principal e auditado no log do banco. Dados pessoais são retidos por 5 anos para obrigações fiscais e trabalhistas e depois anonimizados. Pedidos, visitas e ocorrências de vencimento não são excluídos (histórico fiscal e de auditoria).</p>
+</main></body></html>
