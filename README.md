@@ -186,18 +186,18 @@ O levantamento completo está em `levantamento/levantamento.md`.
 
 ###### Processos comuns no ramo
 
-O grupo levantou, com apoio de IA (seção 6), o que empresas de representação de alimentos costumam controlar, e conferiu com o representante o que existe na Letty. A coluna PCR indica a qual processo principal (PCR01 a PCR06) cada item se relaciona.
+O grupo levantou, com apoio de IA (seção 6), o que empresas de representação de alimentos costumam controlar, e conferiu com o representante o que existe na Letty.
 
-| Processo                                                   | PCR          | Na Letty   | Decisão                                                                                                                       |
-|------------------------------------------------------------|--------------|------------|-------------------------------------------------------------------------------------------------------------------------------|
-| Estoque próprio e compras                                  | PCR05        | Não existe | A Letty não tem estoque nem compra mercadoria. O que se registra é a quantidade encontrada na gôndola (PR07).                 |
-| Nota fiscal, logística e cobrança                          | PCR04        | Terceiros  | São do fabricante. O banco guarda a situação do pedido e a entrega prevista (PR05).                                           |
-| Folha e escala dos promotores                              | PCR05        | Terceiros  | São do fabricante ou da agência. O banco guarda o vínculo e as visitas (PR06).                                                |
-| Cancelamento de pedido                                     | PCR03        | Existe     | É a situação *Cancelado* do pedido, que permanece no histórico (PR05, RO02).                                                  |
-| Histórico de situações do pedido                           | PCR03, PCR04 | Parcial    | Guarda-se a situação atual; o histórico com data e hora fica como evolução (seção 1.5).                                       |
-| Devolução e troca                                          | PCR06        | Terceiros  | Acertadas entre loja e indústria. O banco registra a ocorrência (PR08).                                                       |
-| Pesquisa de preço, ações promocionais e previsão de vendas | PCR02, PCR06 | Informal   | Citadas na entrevista, sem registro hoje (O7). Ficam fora desta versão, que se concentra em P1 a P4, e entram como evolução.  |
-| Despesas do representante                                  | —            | Existe     | Combustível, CORE-SP e impostos ficam na contabilidade. O banco cobre a receita, que é a comissão (PR02). Fica como evolução. |
+|       | Processo                                                   | Na Letty   | Decisão                                                                                                                       |
+|-------|------------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------|
+| PCR01 | Estoque próprio e compras                                  | Não existe | A Letty não tem estoque nem compra mercadoria. O que se registra é a quantidade encontrada na gôndola (PR07).                 |
+| PCR02 | Nota fiscal, logística e cobrança                          | Terceiros  | São do fabricante. O banco guarda a situação do pedido e a entrega prevista (PR05).                                           |
+| PCR03 | Folha e escala dos promotores                              | Terceiros  | São do fabricante ou da agência. O banco guarda o vínculo e as visitas (PR06).                                                |
+| PCR04 | Cancelamento de pedido                                     | Existe     | É a situação *Cancelado* do pedido, que permanece no histórico (PR05, RO02).                                                  |
+| PCR05 | Histórico de situações do pedido                           | Parcial    | Guarda-se a situação atual; o histórico com data e hora fica como evolução (seção 1.5).                                       |
+| PCR06 | Devolução e troca                                          | Terceiros  | Acertadas entre loja e indústria. O banco registra a ocorrência (PR08).                                                       |
+| PCR07 | Pesquisa de preço, ações promocionais e previsão de vendas | Informal   | Citadas na entrevista, sem registro hoje (O7). Ficam fora desta versão, que se concentra em P1 a P4, e entram como evolução.  |
+| PCR08 | Despesas do representante                                  | Existe     | Combustível, CORE-SP e impostos ficam na contabilidade. O banco cobre a receita, que é a comissão (PR02). Fica como evolução. |
 
 
 ##### Requisitos funcionais
