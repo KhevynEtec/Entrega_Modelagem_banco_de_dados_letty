@@ -29,7 +29,7 @@ A Letty Gestão Comercial Ltda é a empresa pela qual Ednilson Soares Silva atua
 | Abertura                | 03/09/2025                                                                  |
 | Natureza jurídica       | 206-2, Sociedade Empresária Limitada, com fins lucrativos                   |
 | Porte (Receita Federal) | Empresa de Pequeno Porte                                                    |
-| Atividade               | Representação comercial de produtos alimentícios (CNAE 46.17-6-00)          |
+| Atividade               | Representação comercial de produtos alimentícios (CNAE 46.17-6-00, atividade secundária no CNPJ; a principal registrada é 63.99-2-00) |
 | Endereço                | Rua Oswaldo Arouca, 646, apto 71, Vila Formosa, São Paulo/SP, CEP 03363-000 |
 
 Hoje são três fabricantes representados:
@@ -71,7 +71,7 @@ As informações estão espalhadas: uma planilha por fabricante, os portais das 
 | P1  | **Perda por vencimento no ponto de venda.** Não há controle de lote e validade na gôndola; o vencimento é descoberto tarde e vira prejuízo.         | `lote`; `item_visita`, com quantidade e menor validade encontradas; `vencimento_prod`, com a ocorrência e sua situação. | G01, G02, G06 |
 | P2  | **Promotoria sem controle.** O trabalho depende de promotores terceirizados, e não se sabe quem visitou cada loja, quando, nem por quanto tempo.    | `promotor`; `envia_promotor`, que liga o promotor aos fabricantes; `visita`, com data e horários.                                | G03, A04, A08 |
 | P3  | **Pedidos e entregas sem rastro.** A venda é anotada só pelo total, o cliente é um nome digitado e a situação do pedido fica nos portais das redes. | `super_mercado` e `loja`, com CNPJ único; `pedido`, com situação e entrega prevista; `item_pedido`.                     | G04, G07      |
-| P4  | **Contratos e comissões sem registro.** O pagamento da comissão é marcado com um “OK” sem data, e o percentual é redigitado em cada linha.          | `contrato`, com vigência, percentual e meta; `comissao`, com base, percentual aplicado, situação e data de pagamento.   | G05, G08      |
+| P4  | **Contratos e comissões sem registro.** O pagamento da comissão é marcado com um “OK” sem data, e o percentual é redigitado em cada linha.          | `contrato`, com vigência, percentual e meta; `comissao`, uma por pedido, com base, percentual aplicado, situação e data de pagamento. | G05, G08      |
 
 #### Escopo
 
@@ -153,7 +153,7 @@ Tabela 1 — Transcrição da planilha (datas de 2026). Todas as linhas fecham c
 | O5  | Percentuais redigitados em cada linha.                                                                                                                            | Risco de percentual errado.                                 | `contrato.percentual_comissao` e `comissao.percentual_aplicado`.     | P4     |
 | O6  | Pagamento marcado com “OK”, sem data. Duas comissões estavam pendentes havia 33 e 9 dias.                                                                         | Não dá para saber se há atraso.                             | `comissao.status_pagamento` e `dt_pagamento`.                        | P4     |
 | O7  | Nenhum registro de visita, validade ou vencido. Segundo ele, isso fica nos relatórios do promotor e da rede.                                                      | O processo existe, mas o dado não fica guardado.            | `visita`, `item_visita` e `vencimento_prod`.                         | P1, P2 |
-| O8  | A comissão incide sobre o valor já descontado do contrato — regra que não apareceu na entrevista.                                                                 | É uma regra de cálculo que o sistema precisa seguir.        | `comissao.valor_base` guarda a base líquida (RN10).                  | P4     |
+| O8  | A comissão incide sobre o valor já descontado do contrato — regra que não apareceu na entrevista.                                                                 | É uma regra de cálculo que o sistema precisa seguir.        | `super_mercado.pc_desconto_contratual` guarda o desconto de cada rede; `comissao.valor_base`, a base líquida (RN10). | P4     |
 | O9  | Pedido e comissão na mesma linha, sem coluna de situação.                                                                                                         | Cancelar ou cortar exige apagar ou reescrever a linha.      | Situações separadas em `pedido` e `comissao`; nada é apagado (RO02). | P3, P4 |
 | O10 | Feita a conta, o Oba tem 3 dos 4 pedidos e 82,6% do valor bruto.                                                                                                  | A dependência de um cliente só aparece fora da planilha.    | Consultas por rede (G04, G07) e por fabricante (G05, G08).           | P3, P4 |
 
@@ -176,8 +176,8 @@ O levantamento completo está em `levantamento/levantamento.md`.
 | Processo                       | Como funciona e que dados registra                                                                                                                                                                                                                                                                                                                                                                                             | Prob. |
 |--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|
 | PR01 · Fabricantes e contratos | Ao assumir um fabricante, o representante cadastra razão social, nome fantasia, CNPJ, inscrição estadual, endereço (logradouro, número, complemento, bairro, UF, CEP), telefones e e-mails — estes opcionais, porque a FruitLog não informou contato. O contrato traz início, fim, situação, percentual de comissão, meta de vendas, território e exclusividade. A renovação anual encerra o contrato anterior e abre um novo. | P4    |
-| PR02 · Apuração de comissões   | No fim do mês, cada contrato gera a comissão sobre as vendas entregues: data de apuração, valor base (já sem o desconto contratual), percentual aplicado, valor, situação (*Pendente*, *Aprovado*, *Pago* ou *Cancelado*) e data de pagamento.                                                                                                                                                                                 | P4    |
-| PR03 · Redes, lojas e contatos | Rede: CNPJ, razão social, nome fantasia, inscrição estadual, representante geral, portal de fornecedores, início do relacionamento e endereço. Loja: CNPJ, código na rede, nome, situação, telefones e e-mails de recebimento; o centro de distribuição entra como loja da rede. Contato: nome, cargo, setor, telefones e e-mails.                                                                                             | P3    |
+| PR02 · Apuração de comissões   | Cada pedido entregue gera uma comissão, apurada no fim do mês, ligada ao pedido e ao contrato em vigor: data de apuração, valor base (já sem o desconto contratual), percentual aplicado, valor, situação (*Pendente*, *Aprovado*, *Pago* ou *Cancelado*) e data de pagamento.                                                                                                                                                                                 | P4    |
+| PR03 · Redes, lojas e contatos | Rede: CNPJ, razão social, nome fantasia, inscrição estadual, representante geral, portal de fornecedores, início do relacionamento, desconto contratual e endereço. Loja: CNPJ, código na rede, nome, tipo, situação, telefones e e-mails de recebimento; o centro de distribuição entra como loja da rede, do tipo *CD*. Contato: nome, cargo, setor, telefones e e-mails.                                                                                             | P3    |
 | PR04 · Produtos e lotes        | Produto: EAN, NCM, descrição, marca, embalagem, unidade, pesos bruto e líquido, regime tributário, preço de tabela e se está ativo. Lote: número, fabricação, validade e quantidade produzida.                                                                                                                                                                                                                                 | P1    |
 | PR05 · Pedidos                 | O pedido sai da reunião com o comprador. Registra loja de entrega (o CD, no pedido centralizado), rede, fabricante, data, condição de pagamento, total, entrega prevista e situação: *Negociação*, *Registrado*, *Aprovado*, *Faturado*, *Em Transporte*, *Entregue*, *Entregue Parcialmente*, *Recusado/Cortado* ou *Cancelado*. Cada item tem produto, quantidade e preço negociado.                                         | P3    |
 | PR06 · Promotoria e visitas    | Promotor: CPF, nome, empresa contratante, telefones e fabricantes que atende. Visita: loja, promotor, data, horários de início e fim e observação, a cada 7 a 30 dias conforme o giro.                                                                                                                                                                                                                                         | P2    |
@@ -204,8 +204,8 @@ O grupo levantou, com apoio de IA (seção 6), o que empresas de representação
 
 |      | Requisito                                                                                                                                                                                                                                                                                               | Prob.  |
 |------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
-| RF01 | Cadastrar fabricantes e redes com razão social, nome fantasia, CNPJ único, inscrição estadual e endereço (logradouro, número, complemento, bairro, UF, CEP); lojas com CNPJ, código na rede, nome e situação; telefones de fabricante, loja, contato e promotor; e-mails de fabricante, loja e contato. | P3     |
-| RF02 | Registrar contratos (fabricante, início, fim, situação, percentual, meta, território, exclusividade) e comissões (valor base, percentual aplicado, valor, situação, datas de apuração e de pagamento).                                                                                                  | P4     |
+| RF01 | Cadastrar fabricantes e redes com razão social, nome fantasia, CNPJ único, inscrição estadual e endereço (logradouro, número, complemento, bairro, UF, CEP); redes com desconto contratual; lojas com CNPJ, código na rede, nome, tipo (loja ou CD) e situação; telefones de fabricante, loja, contato e promotor; e-mails de fabricante, loja e contato. | P3     |
+| RF02 | Registrar contratos (fabricante, início, fim, situação, percentual, meta, território, exclusividade) e comissões, uma por pedido (valor base, percentual aplicado, valor, situação, datas de apuração e de pagamento).                                                                                                  | P4     |
 | RF03 | Manter produtos com EAN único, NCM, descrição, marca, embalagem, unidade, pesos, regime tributário, preço de tabela e situação, e seus lotes (número, fabricação, validade, quantidade).                                                                                                                | P1     |
 | RF04 | Registrar pedidos com loja, rede, fabricante, data, condição de pagamento, total, entrega prevista e situação, e itens com produto, quantidade e preço negociado.                                                                                                                                       | P3     |
 | RF05 | Registrar visitas com data, horários e observação, e os produtos conferidos com quantidade em gôndola e menor validade.                                                                                                                                                                                 | P1, P2 |
@@ -233,17 +233,17 @@ RN01 a RN06, RO01 e RO02 vêm da Entrega 1. RN07 a RN15 foram levantadas agora, 
 
 |      | Regra                                                                                                    | Implementação                              |
 |------|----------------------------------------------------------------------------------------------------------|--------------------------------------------|
-| RN01 | Não há pedido para loja, fabricante ou produto não cadastrado.                                           | FKs de `pedido` e `item_pedido`            |
+| RN01 | Não há pedido para loja, fabricante ou produto não cadastrado.                                           | FKs de `pedido` e `item_pedido`; A09       |
 | RN02 | CNPJ (fabricante, rede, loja), CPF (promotor) e EAN (produto) são obrigatórios e únicos.                 | `UNIQUE`, `NOT NULL`                       |
 | RN03 | Todo pedido tem pelo menos um item.                                                                      | A01                                        |
 | RN04 | O preço negociado não fica abaixo do preço de tabela.                                                    | `CHECK` de valor ≥ 0; A03                  |
 | RN05 | Produto vencido não é vendido nem reposto; a ocorrência fica aberta até o descarte.                      | A05                                        |
 | RN06 | Cada loja tem suas regras de recebimento (janela de horário, documentos).                                | Processo operacional, não armazenado (1.5) |
 | RN07 | A validade do lote é posterior à fabricação.                                                             | A02                                        |
-| RN08 | Comissão só é devida sobre pedido entregue; pedido cancelado gera comissão *Cancelado*.                  | Situações de `comissao` e `pedido`         |
+| RN08 | Comissão só é devida sobre pedido entregue; pedido cancelado gera comissão *Cancelado*.                  | `comissao.id_pedido`; A10                  |
 | RN09 | Produto conferido com validade em até 30 dias entra em alerta; em até 10, é urgente.                     | G01                                        |
-| RN10 | `valor_comissao = valor_base × percentual_aplicado ÷ 100`, com base líquida do desconto contratual.      | Carga de dados; `CHECK` de percentual      |
-| RN11 | Toda loja ativa é visitada pelo menos a cada 30 dias.                                                    | A04, A08                                   |
+| RN10 | `valor_comissao = valor_base × percentual_aplicado ÷ 100`, com base líquida do desconto contratual.      | `pc_desconto_contratual`; `CHECK`; A10     |
+| RN11 | Toda loja ativa (exceto o CD) é visitada pelo menos a cada 30 dias.                                      | A04, A08                                   |
 | RN12 | Não há pedido mínimo fixo: ele acompanha o porte do mercado. A condição de pagamento fica no pedido.     | `pedido.ds_condicao_pagamento`             |
 | RN13 | Vencido ou avariado é registrado, comunicado à indústria e só se encerra como *Descartado*.              | `CHECK` de situação; A05                   |
 | RN14 | O contrato (Lei 4.886/1965) fixa vigência, território e percentual; na Letty, sem exclusividade de zona. | `contrato`, `CHECK` de vigência            |
@@ -309,6 +309,7 @@ Em **1:N**, a chave do lado 1 vai como FK para o lado N; a mínima 1 do lado 1 t
 |-----------------------------------|------------------------------------------------------|---------------|
 | Fabricante firma contrato         | `contrato.id_fabricante`                             | (1,1)–(1,n)   |
 | Contrato gera comissão            | `comissao.id_contrato`                               | (1,1)–(0,n)   |
+| Pedido gera comissão              | `comissao.id_pedido` (`UNIQUE`)                      | (1,1)–(0,1)   |
 | Fabricante fabrica produto        | `produto.id_fabricante`                              | (1,1)–(0,n)   |
 | Produto possui lote               | `lote.id_produto`                                    | (1,1)–(0,n)   |
 | Rede possui loja                  | `loja.id_rede`                                       | (1,1)–(1,n)   |
@@ -399,8 +400,9 @@ Não há relacionamento 1:1 nem generalização no DER, então nenhuma estratég
 </tr>
 <tr class="even">
 <td><code>comissao</code></td>
-<td><code>id_comissao</code></td>
-<td><code>id_contrato</code> → <code>contrato</code></td>
+<td><code>id_comissao</code><br />
+<span style="color:#74787d">único: <code>id_pedido</code></span></td>
+<td><code>id_contrato</code> → <code>contrato</code>; <code>id_pedido</code> → <code>pedido</code></td>
 </tr>
 <tr class="odd">
 <td><code>pedido</code></td>
@@ -497,13 +499,15 @@ O ponto de partida foi a própria planilha da Figura 2, que mistura cliente, ped
 
 #### Redundâncias mantidas
 
-Três colunas poderiam ser derivadas de outras tabelas. Ficaram por decisão de projeto, e duas delas têm consulta que confere a consistência:
+Cinco colunas poderiam ser derivadas de outras tabelas. Ficaram por decisão de projeto, e quatro delas têm consulta que confere a consistência:
 
 | Coluna                  | Derivável de          | Motivo                                                                   | Conferência |
 |-------------------------|-----------------------|--------------------------------------------------------------------------|-------------|
 | `pedido.id_rede`        | `loja.id_rede`        | A negociação é com a rede; filtra pedidos por rede sem passar pela loja. | A06         |
 | `pedido.vl_preco_total` | soma de `item_pedido` | Total do pedido usado nos relatórios e na apuração da comissão.          | A07         |
 | `vencimento_prod.cnpj`  | `loja.cnpj`           | CNPJ que constou na notificação enviada à indústria.                     | —           |
+| `comissao.valor_comissao` | `valor_base × percentual_aplicado` | Valor efetivamente pago; não muda se a regra de arredondamento mudar. | A10         |
+| `comissao.id_contrato`  | fabricante e data do pedido | Registra o contrato usado no cálculo, que sobrevive à renovação.   | A10         |
 
 Cada forma normal resolveu um problema visível na planilha. Sem a 1FN, não cabem dois telefones de uma loja nem vários produtos num pedido — e é por isso que a planilha guarda só o total. Sem a 2FN, o preço de tabela se repetiria em cada item, e mudar um preço significaria alterar vários pedidos. Sem a 3FN, o percentual continuaria sendo digitado linha a linha, como no achado O5.
 
@@ -515,7 +519,7 @@ As entidades usam chave substituta `INT AUTO_INCREMENT`. CNPJ, CPF e EAN são ú
 
 #### Chaves estrangeiras e exclusão
 
-Cada FK implementa um relacionamento da seção 1.2, e todas são `NOT NULL`, porque a mínima do lado 1 é sempre 1. `ON DELETE RESTRICT` protege quem tem histórico — `pedido`, `item_pedido`, `visita`, `item_visita`, `vencimento_prod`, `loja`, `contrato`, `produto` e `envia_promotor` (RO02, RNF04). `ON DELETE CASCADE` fica para o que só existe em função do pai: `contato`, `lote` e `comissao`.
+Cada FK implementa um relacionamento da seção 1.2, e todas são `NOT NULL`, porque a mínima do lado 1 é sempre 1. `ON DELETE RESTRICT` protege quem tem histórico — `pedido`, `item_pedido`, `visita`, `item_visita`, `vencimento_prod`, `comissao`, `loja`, `contrato`, `produto` e `envia_promotor` (RO02, RNF04). `ON DELETE CASCADE` fica para o que só existe em função do pai: `contato`, `lote` e as tabelas de telefone, e-mail e endereço.
 
 #### Cardinalidades
 
@@ -524,6 +528,7 @@ Cada FK implementa um relacionamento da seção 1.2, e todas são `NOT NULL`, po
 | Rede possui loja                  | (1,1)–(1,n)   | A loja tem CNPJ de filial de uma única rede; rede sem loja não é cadastrada. O Sacolão Saúde tem uma.             |
 | Fabricante firma contrato         | (1,1)–(1,n)   | Só se representa quem tem contrato; a renovação anual cria um novo.                                               |
 | Contrato gera comissão            | (1,1)–(0,n)   | A comissão nasce na apuração; contrato recém-assinado ainda não tem nenhuma.                                      |
+| Pedido gera comissão              | (1,1)–(0,1)   | Cada comissão é de um pedido (como na planilha, uma linha por venda); pedido em andamento ou recusado não tem.     |
 | Pedido contém produto             | (0,n)–(1,n)   | Pedido tem ao menos um produto (RN03); um produto pode nunca ter sido vendido.                                    |
 | Fabricante, rede e loja no pedido | (1,1)–(0,n)   | Cada fabricante fatura o seu pedido; há uma rede e uma loja de entrega, que no pedido centralizado é o CD.        |
 | Produto possui lote               | (1,1)–(0,n)   | O lote é de um produto e tem uma validade.                                                                        |
@@ -540,7 +545,9 @@ Cada FK implementa um relacionamento da seção 1.2, e todas são `NOT NULL`, po
 | `NOT NULL` nos campos obrigatórios                             | Todas                                                        | RN02, dicionário                   |
 | `vl_preco_tabela >= 0`, pesos `>= 0`                           | `produto`                                                    | Valores não negativos              |
 | `percentual_comissao BETWEEN 0 AND 100`, `dt_fim >= dt_inicio` | `contrato`                                                   | RN14                               |
-| `percentual_aplicado BETWEEN 0 AND 100`, `valor_base >= 0`     | `comissao`                                                   | RN10                               |
+| `percentual_aplicado BETWEEN 0 AND 100`, valores `>= 0`, `UNIQUE (id_pedido)` | `comissao`                                    | RN08, RN10                         |
+| `pc_desconto_contratual BETWEEN 0 AND 100`                     | `super_mercado`                                              | RN10                               |
+| `tp_loja IN ('Loja', 'CD')`                                    | `loja`                                                       | RN11                               |
 | `qt_solicitada > 0 AND vl_preco_negociado >= 0`                | `item_pedido`                                                | RN03, RN04                         |
 | `hr_fim >= hr_inicio`                                          | `visita`                                                     | Horário coerente                   |
 | Quantidades: gôndola `>= 0`, vencido `> 0`, produzida `>= 0`   | `item_visita`, `vencimento_prod`, `lote`                     | RN05                               |
@@ -553,8 +560,10 @@ Cada FK implementa um relacionamento da seção 1.2, e todas são `NOT NULL`, po
 - **Lote ligado ao produto, não ao pedido.** O comprador não escolhe lote; o lote aparece na conferência e no vencimento.
 - **Contrato separado da comissão.** As condições ficam num registro e o resultado de cada mês em outro, sem perder histórico.
 - **Auditoria em vez de `CHECK` para RN04 e RN07.** O pedido vem do portal da rede como foi fechado. Em vez de bloquear o lançamento, A03 e A02 apontam a inconsistência para correção.
-- **`vencimento_prod.numero_lote` sem FK.** O lote vencido achado na loja nem sempre está cadastrado; guarda-se o número informado.
-- **Limites desta versão.** O pedido guarda só a situação atual e a entrega prevista, sem a data real nem a quantidade atendida; as regras de recebimento de cada loja (RN06) não são armazenadas; a comissão liga-se ao contrato, não ao pedido, e RN08 é conferida pela situação. As extensões necessárias estão na seção 1.6.
+- **`vencimento_prod.numero_lote` sem FK.** O lote vencido achado na loja nem sempre está cadastrado; guarda-se o número informado, como texto, no mesmo formato de `lote.numero_lote`.
+- **Comissão por pedido, com desconto da rede.** Na planilha, cada venda tem a sua comissão e o desconto contratual muda conforme o cliente (3,6% no Oba, 0% no Sacolão). Por isso a comissão liga-se ao pedido e o desconto fica na rede. O representante não confirmou essa regra para os outros fabricantes; é a premissa adotada a partir da planilha.
+- **Centro de distribuição como loja do tipo CD.** O CD recebe pedidos centralizados, mas não tem gôndola: não recebe visita e fica fora de A04 e A08.
+- **Limites desta versão.** O pedido guarda só a situação atual e a entrega prevista, sem a data real nem a quantidade atendida; as regras de recebimento de cada loja (RN06) não são armazenadas; na entrega parcial, a comissão usa o valor do pedido, porque o banco não guarda a quantidade atendida. As extensões necessárias estão na seção 1.6.
 
 ### 1.6 Arquitetura analítica para BI e IA
 
@@ -607,9 +616,9 @@ Os fatos estão em `item_pedido` (vendas), `item_visita` (gôndola), `visita` (p
 
 ## 2. Modelo lógico relacional
 
-O modelo lógico foi feito no **brModelo 3.2** (arquivo `diagramas/Modelo_Logico.brM3`), na notação de modelo lógico: cada tabela traz o nome no topo e uma linha por coluna, com o tipo de dado; as chaves aparecem como `PK`, `FK` ou `PK, FK`; cada ligação mostra `(mín, máx)` nas duas pontas. São 24 tabelas, 139 colunas e 28 chaves estrangeiras.
+O modelo lógico foi feito no **brModelo 3.2** (arquivo `diagramas/Modelo_Logico.brM3`), na notação de modelo lógico: cada tabela traz o nome no topo e uma linha por coluna, com o tipo de dado; as chaves aparecem como `PK`, `FK` ou `PK, FK`; cada ligação mostra `(mín, máx)` nas duas pontas. São 24 tabelas, 142 colunas e 29 chaves estrangeiras.
 
-Na Figura 4, a chave amarela indica `PK`, a verde indica `FK` e as duas juntas indicam `PK, FK`, como nas colunas de `envia_promotor`. O “U” marca as colunas `UNIQUE` (CNPJ, CPF e EAN). As demais restrições — `NOT NULL`, `CHECK` e `DEFAULT` — não aparecem no diagrama e estão no dicionário (`docs/Dicionario_de_Dados_letty.html`) e no script (seção 3).
+Na Figura 4, a chave amarela indica `PK`, a verde indica `FK` e as duas juntas indicam `PK, FK`, como nas colunas de `envia_promotor`. O “U” marca as colunas `UNIQUE` (CNPJ, CPF e EAN). As demais restrições — `NOT NULL`, `CHECK`, `DEFAULT` e as regras `ON DELETE` — não aparecem no diagrama e estão no dicionário (`docs/Dicionario_de_Dados_letty.html`) e no script (seção 3), que é a referência para a integridade referencial.
 
 ![Figura 4](diagramas/Modelo_Logico.png)
 
@@ -617,18 +626,18 @@ Na Figura 4, a chave amarela indica `PK`, a verde indica `FK` e as duas juntas i
 
 ## 3. Script SQL completo
 
-O arquivo `docs/script_completo.sql` tem 2.691 linhas e roda no MySQL 8 do começo ao fim: cria o banco `letty_gestao_comercial` se ainda não existir, apaga as tabelas anteriores, cria as 24 tabelas, carrega a massa e executa as consultas.
+O arquivo `docs/script_completo.sql` tem 2.673 linhas e roda no MySQL 8 do começo ao fim: cria o banco `letty_gestao_comercial` se ainda não existir, apaga as tabelas anteriores, cria as 24 tabelas, carrega a massa e executa as consultas.
 
 |     | Bloco                       | Conteúdo                                                                                                        |
 |-----|-----------------------------|-----------------------------------------------------------------------------------------------------------------|
 | 1   | `CREATE DATABASE`           | `utf8mb4` e `utf8mb4_unicode_ci`, seguido de `DROP TABLE IF EXISTS` das 24 tabelas com `FOREIGN_KEY_CHECKS = 0` |
 | 2   | `CREATE TABLE` e restrições | 24 tabelas InnoDB com PK, FK (`RESTRICT` ou `CASCADE`), `NOT NULL`, `UNIQUE` e `CHECK`                          |
-| 3   | `INSERT INTO`               | Massa fictícia com 2.058 registros (seção 4)                                                                    |
+| 3   | `INSERT INTO`               | Massa fictícia com 2.006 registros (seção 4)                                                                    |
 | 4   | `SELECT` com `JOIN`         | S01: catálogo com fabricante e lotes. S02: lojas com rede, telefone e e-mail                                    |
 | 5   | `UPDATE`                    | U01: aprovação do pedido 30 (RN01). U02: troca do celular de um promotor                                        |
 | 6   | `DELETE`                    | D01: telefone cadastrado por engano. Só dado auxiliar — pedidos e visitas não se apagam (RO02)                  |
 | 7   | Consultas gerenciais        | G01 a G08                                                                                                       |
-| 8   | Consultas de auditoria      | A01 a A08                                                                                                       |
+| 8   | Consultas de auditoria      | A01 a A10                                                                                                       |
 
 ### Trecho do script
 
@@ -666,11 +675,11 @@ O arquivo `docs/script_completo.sql` tem 2.691 linhas e roda no MySQL 8 do come�
 
 |     | Pergunta                                                                                     | Atende ou verifica                                                                                    | Linhas |
 |-----|----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|--------|
-| G01 | Quais produtos conferidos em gôndola nos últimos 30 dias vencem nos próximos 30 dias?        | P1 (risco de perdas por vencimento no PDV); RN09 (alerta de validade; urgente em até 10 dias)         | 93     |
+| G01 | Quais produtos conferidos em gôndola nos últimos 30 dias vencem nos próximos 30 dias?        | P1 (risco de perdas por vencimento no PDV); RN09 (alerta de validade; urgente em até 10 dias)         | 91     |
 | G02 | Quais ocorrências de produtos vencidos/avariados existem por loja?                           | P1 (risco de perdas por vencimento no PDV)                                                            | 20     |
 | G03 | Qual a rotina e o tempo médio de permanência de cada promotor nas lojas (últimos 90 dias)?   | P2 (acompanhamento da promotoria); KPI tempo médio de permanência                                     | 14     |
 | G04 | Qual o status de cada pedido por rede e loja, com o atraso em relação à entrega prevista?    | P3 (fluxo de pedidos e entregas)                                                                      | 34     |
-| G05 | Quais comissões foram apuradas por fabricante?                                               | P4 (controle de contratos e comissões)                                                                | 22     |
+| G05 | Quais comissões foram apuradas por fabricante, pedido e rede?                                | P4 (controle de contratos e comissões)                                                                | 24     |
 | G06 | KPI "Índice de Perdas por Vencimento (IPV)": quantas unidades vencidas por loja em cada mês? | P1 (KPI 1 — IPV)                                                                                      | 18     |
 | G07 | KPI "Taxa de pedidos por status": que percentual dos pedidos está em cada status?            | P3 (KPI 2 — entregas integrais x parciais x cortadas)                                                 | 9      |
 | G08 | KPI "Comissões apuradas x liquidadas": quanto há por status de pagamento em cada fabricante? | P4 (KPI 3 — comissões apuradas x pagas)                                                               | 6      |
@@ -682,8 +691,10 @@ O arquivo `docs/script_completo.sql` tem 2.691 linhas e roda no MySQL 8 do come�
 | A06 | Existe pedido cuja rede é diferente da rede da loja de entrega?                              | consistência do id_rede gravado em PEDIDO (cópia de LOJA.id_rede; ver README 1.4)                     | 1      |
 | A07 | Existe pedido cujo valor total difere da soma dos itens?                                     | consistência de VL_PRECO_TOTAL (valor consolidado; ver README 1.4)                                    | 1      |
 | A08 | Existe loja ativa sem visita nos últimos 30 dias (ou nunca visitada)?                        | RN11 (periodicidade mínima de visita; ajustar o intervalo ao valor definido na RN11)                  | 6      |
+| A09 | Existe item de pedido cujo produto é de outro fabricante?                                    | RN01 (os itens do pedido são produtos do fabricante do pedido)                                        | 0      |
+| A10 | Existe comissão inconsistente com o pedido, o contrato ou o cálculo?                         | RN08 e RN10                                                                                           | 0      |
 
-Linhas devolvidas pela massa da seção 4 numa execução simulada em 04/11/2026. Como lotes, visitas, conferências e vencimentos têm datas relativas a `CURDATE()`, G01, G02, G03, G06, A04, A05 e A08 dão resultado equivalente em qualquer dia.
+Linhas devolvidas pela massa da seção 4 numa execução do script no MySQL 8.0; as datas das amostras supõem execução em 04/11/2026. Como lotes, visitas, conferências e vencimentos têm datas relativas a `CURDATE()`, G01, G02, G03, G06, A04, A05 e A08 dão resultado equivalente em qualquer dia.
 
 ### Resultados esperados
 
@@ -700,7 +711,7 @@ Amostra das saídas, para conferência na demonstração.
 | Vale Verde - Loja 21 Guarulhos | Agua Gaseificada Toranja 500ml fardo 12 | 5                  | 06/11/2026             | 2                | URGENTE    |
 | Vale Verde - Loja 27 Castelo   | Agua Gaseificada Toranja 500ml fardo 12 | 34                 | 06/11/2026             | 2                | URGENTE    |
 
-93 linhas; aqui, as 6 primeiras.
+91 linhas; aqui, as 6 primeiras.
 
 ##### G03 · rotina dos promotores nos últimos 90 dias
 
@@ -710,7 +721,7 @@ Amostra das saídas, para conferência na demonstração.
 | Gisele Martins | Agencia Ponto Certo Merchandising Ltda  | 38         | 7        | 105                   | 01/11/2026    |
 | Daniel Rocha   | Agencia Ponto Certo Merchandising Ltda  | 33         | 5        | 107                   | 02/11/2026    |
 | Fabio Gomes    | Contratado direto pelo fabricante (CLT) | 27         | 6        | 115                   | 31/10/2026    |
-| Henrique Costa | Gondola Viva Promocoes Ltda             | 26         | 3        | 89                    | 03/11/2026    |
+| Leandro Pires  | Contratado direto pelo fabricante (CLT) | 22         | 4        | 104                   | 02/11/2026    |
 
 14 linhas; aqui, as 5 primeiras.
 
@@ -759,12 +770,12 @@ Amostra das saídas, para conferência na demonstração.
 
 | fabricante   | status_pagamento | qt_comissoes | vl_comissao |
 |--------------|------------------|--------------|-------------|
-| AguaSur      | Aprovado         | 1            | 416,06      |
-| AguaSur      | Pago             | 7            | 2.369,53    |
-| Serra Mestra | Cancelado        | 1            | 194,53      |
-| Serra Mestra | Pago             | 5            | 3.872,81    |
-| Vale Doce    | Pago             | 7            | 4.562,95    |
-| Vale Doce    | Pendente         | 1            | 431,64      |
+| AguaSur      | Aprovado         | 1            | 401,08      |
+| AguaSur      | Pago             | 7            | 2.279,52    |
+| Serra Mestra | Cancelado        | 1            | 187,53      |
+| Serra Mestra | Pago             | 7            | 3.733,40    |
+| Vale Doce    | Pago             | 7            | 4.398,69    |
+| Vale Doce    | Pendente         | 1            | 416,10      |
 
 6 linhas.
 
@@ -847,8 +858,8 @@ A massa fica no bloco 3 do `docs/script_completo.sql` e é inteiramente fictíci
 | `endereco_fabricante` | 3         | 1 endereço por fabricante                                                                                                                                                          |
 | `telefone_fabricante` | 3         | 2 fabricantes com contato; a FruitLog não informou telefone nem e-mail                                                                                                             |
 | `email_fabricante`    | 2         | idem                                                                                                                                                                               |
-| `contrato`            | 4         | 1 contrato por fabricante + renovação anual da água (contrato 2025/26 encerrado, 2026/27 ativo)                                                                                    |
-| `comissao`            | 22        | 1 apuração por fabricante por mês com venda entregue (jan–out/2026) + 1 cancelada                                                                                                  |
+| `contrato`            | 5         | 1 contrato por fabricante + renovação anual da água e dos queijos (2025/26 encerrado, 2026/27 ativo)                                                                                    |
+| `comissao`            | 24        | 1 por pedido entregue (19) ou entregue parcialmente (4), mais 1 cancelada; base = soma dos itens menos o desconto da rede |
 | `produto`             | 25        | ≈ 10 produtos de água (como a FruitLog) + 8 queijos + 7 doces, 1 inativo                                                                                                           |
 | `lote`                | 326       | lotes encontrados nos últimos 14 meses — um a cada 60 dias na água (validade de 1 ano), 20 nos queijos (60 dias) e 30 nos doces (180 dias) — mais 2 com datas inválidas para a A02 |
 | `super_mercado`       | 2         | 2 clientes identificados na planilha                                                                                                                                               |
@@ -864,17 +875,17 @@ A massa fica no bloco 3 do `docs/script_completo.sql` e é inteiramente fictíci
 | `envia_promotor`      | 23        | promotores ligados a 1, 2 ou 3 fabricantes                                                                                                                                         |
 | `pedido`              | 34        | ≈ 1 pedido por mês por fabricante (planilha: 4 pedidos da FruitLog em 4 meses) × 3 fabricantes × 10 meses + 1 em negociação                                                        |
 | `item_pedido`         | 117       | 2 a 5 produtos por pedido na rede maior, 1 a 3 na menor (média 3,5)                                                                                                                |
-| `visita`              | 317       | visitas a cada 7 a 30 dias (entrevista) em 52 lojas ativas (3 nunca visitadas), nos últimos 95 dias                                                                                |
-| `item_visita`         | 930       | 2 a 4 produtos dos fabricantes que o promotor atende; a validade é a do lote mais antigo ainda na gôndola                                                                          |
+| `visita`              | 303       | visitas a cada 7 a 30 dias (entrevista) em 51 lojas ativas (3 nunca visitadas; o CD não recebe visita), nos últimos 95 dias                                                                                |
+| `item_visita`         | 889       | 2 a 4 produtos dos fabricantes que o promotor atende; a validade é a do lote mais antigo ainda na gôndola                                                                          |
 | `vencimento_prod`     | 20        | ≈ 2 a 3 ocorrências por mês nos últimos oito meses, cada uma ligada a um lote cadastrado                                                                                           |
-| **Total**             | **2.058** |                                                                                                                                                                                    |
+| **Total**             | **2.006** |                                                                                                                                                                                    |
 
-Os pedidos somam R\$ 445.898,04 de janeiro a outubro de 2026, com mediana de R\$ 10.833,30 — dentro da faixa da planilha, de R\$ 3.975 a R\$ 15.600, com alguns pedidos centralizados maiores, para as 55 lojas. A comissão segue RN10: 5% na água, 3% nos queijos e 4% nos doces, dentro da faixa de 1% a 5% informada.
+Os pedidos somam R\$ 445.898,04 de janeiro a outubro de 2026, com mediana de R\$ 10.833,30 — dentro da faixa da planilha, de R\$ 3.975 a R\$ 15.600, com alguns pedidos centralizados maiores, para as 55 lojas. A comissão segue RN10: 5% na água, 3% nos queijos e 4% nos doces, dentro da faixa de 1% a 5% informada, sobre o valor do pedido menos o desconto contratual da rede (3,6% na rede maior, 0% na menor, como na planilha).
 
 ### Casos cobertos
 
 - Pedidos nas nove situações, inclusive *Cancelado*, *Recusado/Cortado* e *Entregue Parcialmente*; pedidos centralizados no CD e direto na loja; prazos de 7 a 60 dias.
-- Comissões *Pago*, *Aprovado*, *Pendente* e *Cancelado*; um contrato encerrado pela renovação.
+- Comissões *Pago*, *Aprovado*, *Pendente* e *Cancelado*; dois contratos encerrados pela renovação anual.
 - Um fabricante sem telefone nem e-mail, como a FruitLog, e um produto inativo.
 - Itens com validade curta e com ruptura (quantidade zero).
 - Três lojas ativas nunca visitadas, três com visita atrasada e duas inativas.
@@ -887,7 +898,7 @@ Pedidos, contratos e comissões têm datas fixas, de janeiro a outubro de 2026. 
 
 ### Conferência de coerência
 
-Antes da entrega, a massa passou por 25 verificações além das auditorias A01 a A08, todas sem ocorrência: todo item vendido tem lote válido na data do pedido; toda validade conferida na gôndola corresponde a um lote do produto, fabricado antes da visita; conferência com estoque zero não tem validade; todo vencido aponta para um lote cadastrado, com a mesma validade, e foi registrado depois dela; o promotor só confere produtos dos fabricantes que atende; nenhum pedido é anterior ao contrato do fabricante ou ao início do relacionamento com a rede; nenhuma loja inativa tem pedido ou visita; toda comissão fecha com base × percentual do contrato; os telefones têm o DDD da cidade da loja.
+Antes da entrega, a massa passou por 25 verificações além das auditorias A01 a A10, todas sem ocorrência: todo item vendido tem lote válido na data do pedido; toda validade conferida na gôndola corresponde a um lote do produto, fabricado antes da visita; conferência com estoque zero não tem validade; todo vencido aponta para um lote cadastrado, com a mesma validade, e foi registrado depois dela; o promotor só confere produtos dos fabricantes que atende e não tem duas visitas no mesmo horário; nenhum pedido é anterior ao contrato do fabricante ou ao início do relacionamento com a rede; nenhuma loja inativa tem pedido ou visita; toda comissão fecha com base líquida × percentual do contrato; os telefones têm o DDD da cidade da loja.
 
 O uso de IA na geração da massa está na seção 6.
 
@@ -935,32 +946,14 @@ A IA foi usada como apoio nas duas entregas, e o resultado foi revisado pelo gru
 
 |                        | Gemini 2.5 · Entrega 1                                                                                                                                                                                                                                                   | Claude (Anthropic) · Entrega 2                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 |------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Etapa                  | Roteiro da entrevista; primeiras versões do README e do dicionário.                                                                                                                                                                                                      | Pesquisa de processos, requisitos, regras e KPIs típicos de representação comercial; revisão do README contra o script e o esqueleto; ajustes no script (cabeçalhos, consultas G06–G08 e A06–A08, reescrita de G01, G03 e G04); geração do dicionário em HTML e da massa de dados; montagem e revisão deste PDF.                                                                                                                                                                           |
+| Etapa                  | Roteiro da entrevista; primeiras versões do README e do dicionário.                                                                                                                                                                                                      | Pesquisa de processos, requisitos, regras e KPIs típicos de representação comercial; revisão do README contra o script e o esqueleto; ajustes no script (cabeçalhos, consultas G06–G08 e A06–A08, reescrita de G01, G03 e G04); geração do dicionário em HTML e da massa de dados; montagem e revisão deste PDF. Na véspera da entrega, auditoria do repositório e correção do script, do dicionário e deste README (comissão por pedido, desconto contratual da rede, tipo de loja, número do lote em texto, regras de exclusão, consultas A09 e A10), com execução do script no MySQL 8.0.                                                                                                                                                                           |
 | Motivo                 | Ganhar tempo no roteiro e padronizar a documentação.                                                                                                                                                                                                                     | Achar divergências entre relatório, dicionário, modelo lógico e SQL, e montar uma massa no tamanho real da operação, com casos para todas as consultas.                                                                                                                                                                                                                                                                                                                                    |
 | Prompts                | “Gere um roteiro de perguntas para entrevista de levantamento de requisitos com um representante comercial de produtos alimentícios do varejo.” / “Elabore um dicionário de dados conceitual/físico para o sistema de gestão comercial com base nas entidades mapeadas.” | “Com todo o projeto que possui na pasta letty, crie uma pasta dentro dela e dentro da pasta crie um PDF seguindo o esqueleto de entrega 2”, com o esqueleto anexo. A IA perguntou que base usar, e o grupo escolheu o modelo do brModelo e do `script_completo.sql`. Depois: inclusão do bloco de `DROP TABLE` no script e revisão visual e textual do PDF.                                                                                                                                         |
 | Resposta               | Roteiro com 20 perguntas, dicionário em tabela e README preenchido.                                                                                                                                                                                                      | Relatório completo, massa com 2.058 registros, consultas reescritas e diagramas provisórios, depois trocados pelos do brModelo.                                                                                                                                                                                                                                                                                                                                                            |
 | Conferência            | Comparação com a entrevista presencial.                                                                                                                                                                                                                                  | Os números do porte usados na massa foram conferidos com a planilha (Figura 2) e com as entrevistas. Lei 4.886/1965 e LGPD: texto oficial em planalto.gov.br.                                                                                                                                                                                                                                                                                                                              |
 | Rejeitado ou corrigido | Perguntas, tipos e regras genéricos foram trocados pelos da Letty.                                                                                                                                                                                                       | O volume de 15 a 30 pedidos por semana do README antigo foi descartado por não bater com a planilha. A versão ampliada do modelo (despesas, previsão de vendas, pesquisa de preço) ficou como evolução. Os diagramas gerados pela IA foram substituídos pelos do brModelo. Na conferência do script, o grupo viu que a massa não tinha lotes suficientes para os produtos vendidos e conferidos; a massa foi refeita com lotes ao longo de 14 meses e ligada às visitas e aos vencimentos. |
 | Escolha final          | A IA deu a base; o grupo ajustou à Letty.                                                                                                                                                                                                                                | Manter o modelo já desenhado no brModelo, para que DER, modelo lógico, dicionário e script continuem coerentes.                                                                                                                                                                                                                                                                                                                                                                            |
-| Limites                | A IA tende a sugerir estruturas de e-commerce e ERP.                                                                                                                                                                                                                     | A IA leu o arquivo do brModelo por extração de texto e testou o script num banco equivalente, não no MySQL. O script deve ser executado do zero no MySQL do laboratório antes da apresentação.                                                                                                                                                                                                                                                                                             |
-
-**Uso de IA nos slides: a declarar.**
-
-## 7. Apresentação corporativa final
-
-Pitch de oito minutos, com uma ideia por slide e nenhum bloco de texto para ler. A demonstração usa as consultas do script.
-
-|     | Bloco         | Slide ou demonstração                                                                                                                         | Tempo |
-|-----|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-------|
-| 1   | Problema      | A planilha da FruitLog na tela: um representante, três fabricantes, 55 lojas, e o controle num “OK” escrito à mão. P1 a P4 em uma frase cada. | 1:00  |
-| 2   | Solução       | Os três fluxos do banco: fabricante → contrato → comissão; rede → loja → pedido; promotor → visita → gôndola → vencimento.                    | 1:00  |
-| 3   | Modelo lógico | A Figura 4, com destaque para `item_pedido`, `item_visita` e `envia_promotor`.                                                                | 1:15  |
-| 4   | Implementação | O `script_completo.sql` rodando do zero; um `CHECK` recusando um valor inválido.                                                              | 1:00  |
-| 5   | Consultas     | G01 (validade), G08 (comissões a receber), A04 e A08 (lojas esquecidas), A03 (preço abaixo da tabela).                                        | 2:00  |
-| 6   | BI e IA       | Esboço do painel com os seis indicadores; previsão de vencimento e rota dos promotores.                                                       | 1:00  |
-| 7   | Benefícios    | Menos perda por vencimento, comissão cobrada no prazo, visitas auditáveis, pedidos rastreáveis.                                               | 0:45  |
-
-Na defesa, cada integrante responde sozinho à pergunta que receber, então todos precisam dominar as cardinalidades (1.5), a normalização (1.4) e as redundâncias mantidas. A presença de todos é obrigatória, com roupa adequada a uma apresentação corporativa.
+| Limites                | A IA tende a sugerir estruturas de e-commerce e ERP.                                                                                                                                                                                                                     | A IA leu o arquivo do brModelo por extração de texto. O script foi executado do zero no MySQL 8.0 e deve ser executado de novo no MySQL do laboratório antes da apresentação.                                                                                                                                                                                                                                                                                             |
 
 ## Apêndices
 
