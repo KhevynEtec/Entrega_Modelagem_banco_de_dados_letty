@@ -1,6 +1,6 @@
 # Letty Gestão Comercial — Sistema de gestão de representação comercial
 
-**Entrega 2 — Modelo lógico, implementação SQL e apresentação final.** Relatório técnico final do grupo, sobre a Letty Gestão Comercial Ltda (CNPJ 62.549.640/0001-02), São Paulo/SP.
+**Entrega 2 — Modelo lógico, implementação SQL e apresentação final.** Relatório técnico final do grupo, sobre a Letty Gestão Comercial Ltda (CNPJ 62.549.640/0001-02), São Paulo/SP. Para essa entrega professor, por favor considerar os commits do dia 15 de outubro em diante
 
 ## Integrantes
 
